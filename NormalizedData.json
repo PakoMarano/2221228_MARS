@@ -1,0 +1,9 @@
+{
+    "device_id": "greenhouse_temperature",
+    "device_type": "sensor",
+    "timestamp": "2026-03-06T12:00:00Z",
+    "status": "ok",
+    "metric": "string",
+    "value": "number",
+    "unit": "string"
+}
