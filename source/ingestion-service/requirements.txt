@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+aiohttp      # To do REST calls to the simulator
+websockets   # To do WebSocket calls to the simulator
+aiokafka     # To do Kafka calls 
+pydantic     # To define data models for the messages we will send to Kafka
