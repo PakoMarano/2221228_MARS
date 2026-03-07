@@ -1,0 +1,304 @@
+:root {
+  --font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu,
+    Cantarell, "Helvetica Neue", sans-serif;
+
+  /* Colori principali */
+  --color-bg-main: #1b1d24;
+  --color-bg-header: #2a2d37;
+  --color-bg-card: #2a2d37;
+  --color-bg-card-item: #3a3e4b;
+  --color-bg-switch: #4b4c52;
+  --color-bg-button: #ff6b35;
+  --color-bg-button-hover: #662302;
+
+  --color-border-separator: #3a3e4b;
+  --color-border-card-separator: #595a5e;
+
+  --color-text-main: #e5e5e5;
+  --color-text-muted: #a0a0a0;
+  --color-text-card-header: #ffffff;
+  --color-text-card-item-label: #fff;
+  --color-text-card-item-value: #e5e5e5;
+  --color-text-switch: #ccc;
+
+  /* Spaziatura e gap */
+  --gap-header: 1rem;
+  --gap-menu: 16px;
+  --gap-card: 8px;
+  --gap-card-button: 4px;
+  --padding-app: 16px;
+  --padding-card: 16px;
+  --padding-card-item: 8px;
+  --padding-switch: 0 6px;
+
+  /* Font size */
+  --font-size-title: 1.8rem;
+  --font-size-card-header: 1.2rem;
+  --font-size-card-item-label: medium;
+  --font-size-card-item-value: larger;
+  --font-size-card-button: medium;
+  --font-size-switch: 9px;
+
+  /* Border radius */
+  --border-radius-card: 8px;
+  --border-radius-card-item: 4px;
+  --border-radius-menu: 4px;
+  --border-radius-button: 4px;
+  --border-radius-switch: 20px;
+
+  /* Switch */
+  --switch-width: 80px;
+  --switch-height: 22px;
+  --switch-handle-size: 16px;
+
+  /* Shadow */
+  --shadow-header: 0 2px 4px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Container principale */
+.app-container {
+  font-family: var(--font-family) !important;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+  font-family: Arial, sans-serif;
+  margin: 0;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  padding: var(--padding-app);
+  background-color: var(--color-bg-header);
+  /* sfondo header */
+  box-shadow: var(--shadow-header);
+  gap: var(--gap-header);
+}
+
+/* Titolo */
+.app-title {
+  margin: 0;
+  font-size: var(--font-size-title);
+  font-weight: bold;
+}
+
+/* Separatore */
+.header-separator {
+  border: none;
+  border-top: 1px solid var(--color-border-separator);
+  margin: 8px 0;
+}
+
+/* Menu */
+.app-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: var(--gap-menu);
+}
+
+.menu-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: var(--border-radius-menu);
+  color: var(--color-text-muted);
+  font-weight: bold;
+}
+
+.menu-item:hover {
+  background-color: var(--color-bg-card-item);
+  color: #ffffff;
+}
+
+/* Menu attivo */
+.menu-item.active {
+  background-color: var(--color-bg-button);
+  color: #ffffff;
+}
+
+/* Contenuto principale */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--padding-app);
+}
+
+/* Pagine specifiche */
+.dashboard-page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-menu);
+}
+
+.sensors-page,
+.topics-page,
+.actuators-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-menu);
+}
+
+/* Card */
+.card-container {
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-bg-card);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--padding-card);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  font-size: var(--font-size-card-header);
+  font-weight: 600;
+  color: var(--color-text-card-header);
+  margin-bottom: 4px;
+}
+
+.card-separator {
+  border: none;
+  border-top: 1px solid var(--color-border-card-separator);
+  margin: 4px 0 8px 0;
+}
+
+.card-content {
+  flex: 1;
+  color: var(--color-text-main);
+}
+
+.card-button {
+  background-color: var(--color-bg-button);
+  color: #fff;
+  border: none;
+  border-radius: var(--border-radius-button);
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: var(--font-size-card-button);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-card-button);
+}
+
+.card-button:hover {
+  background-color: var(--color-bg-button-hover);
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--gap-card);
+  height: 100%;
+}
+
+.card-item {
+  background-color: var(--color-bg-card-item);
+  border-radius: var(--border-radius-card-item);
+  padding: var(--padding-card-item);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+}
+
+.card-item-label {
+  display: flex;
+  width: 60%;
+  height: 100%;
+  justify-content: start;
+  font-weight: bold;
+  font-size: var(--font-size-card-item-label);
+  color: var(--color-text-card-item-label);
+}
+
+.card-item-value {
+  display: flex;
+  width: 40%;
+  height: 100%;
+  justify-content: end;
+  font-size: var(--font-size-card-item-value);
+  color: var(--color-text-card-item-value);
+}
+
+.card-item-value-end {
+  align-items: end;
+}
+
+.card-item-value-center {
+  align-items: center;
+}
+
+.card-item-label-margin {
+  margin-bottom: 4px;
+}
+
+/* SWITCH */
+.switch {
+  position: relative;
+  width: var(--switch-width);
+  height: var(--switch-height);
+}
+
+.switch input {
+  display: none;
+}
+
+.switch-slider {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-bg-switch);
+  border-radius: var(--border-radius-switch);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size-switch);
+  font-weight: bold;
+  padding: var(--padding-switch);
+  color: var(--color-text-switch);
+}
+
+.switch-slider::before {
+  content: "";
+  position: absolute;
+  height: var(--switch-handle-size);
+  width: var(--switch-handle-size);
+  left: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.switch input:checked + .switch-slider {
+  background-color: var(--color-bg-button);
+  color: #fff;
+  justify-content: flex-start;
+}
+
+.switch input:checked + .switch-slider::before {
+  transform: translateX(58px);
+}
+
+.switch-slider::after {
+  content: "OFF";
+  margin-left: auto;
+}
+
+.switch input:checked + .switch-slider::after {
+  content: "ON";
+  margin-left: 0;
+}
