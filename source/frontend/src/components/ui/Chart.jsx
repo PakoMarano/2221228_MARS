@@ -27,7 +27,6 @@ const Chart = ({ data, type = "line", title = "", unit = "", height = 300 }) => 
 
     useEffect(() => {
         if (titleRef.current) {
-            console.log(titleRef.current.offsetHeight)
             setChartHeight(height - titleRef.current.offsetHeight - 20);
         }
     }, [title, data]);
