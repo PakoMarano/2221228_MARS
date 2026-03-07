@@ -21,7 +21,7 @@ const SensorsCard = ({ onViewAll }) => {
                 </div>
             }
         >
-            <div className="card-grid">
+            <div className="card-grid cols-2">
                 {Object.values(SENSORS).map((sensor) => {
                     const lastValue = getLastSensorValue(sensorsState, sensor.key);
                     const displayValue = lastValue !== null ? lastValue.value : "-";

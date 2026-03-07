@@ -21,7 +21,7 @@ const TopicsCard = ({ onViewAll }) => {
                 </div>
             }
         >
-            <div className="card-grid">
+            <div className="card-grid cols-2">
                 {Object.values(TOPICS).map((topic) => {
                     const lastValue = getLastTopicValue(topicsState, topic.key);
                     const displayValue = lastValue !== null ? lastValue.value : "-";
