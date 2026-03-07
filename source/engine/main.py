@@ -17,6 +17,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Note: We intentionally do not validate or prevent logically conflicting rules 
+# (e.g., Rule A turns fan ON, Rule B turns fan OFF for the same threshold).
+# Building a conflict-resolution or priority graph is out of scope.
+# Resolving logical contradictions is delegated to the dashboard user.
 @app.post("/rules", response_model=RuleResponse)
 async def create_rule(rule: RuleCreate):
     conn = get_db_connection()
