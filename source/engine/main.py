@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
 
+import httpx
 from fastapi import FastAPI, HTTPException
 from typing import List
 
 from database import get_db_connection, init_db
-from model import RuleCreate, RuleResponse, RuleUpdate
+from model import RuleCreate, RuleResponse, RuleUpdate, ActuatorCommand
 
+SIMULATOR_URL = "http://localhost:8080"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -83,3 +85,24 @@ async def delete_rule(rule_id: int):
         raise HTTPException(status_code=404, detail="Rule not found")
     
     return {"status": "success", "deleted_id": rule_id}
+
+@app.post("/actuators/{actuator_name}")
+async def manual_actuator_override(actuator_name: str, command: ActuatorCommand):
+    async with httpx.AsyncClient() as client:
+        try:
+            # Forward the exact payload format the simulator expects
+            response = await client.post(
+                f"{SIMULATOR_URL}/api/actuators/{actuator_name}",
+                json={"state": command.state},
+                timeout=3.0
+            )
+            response.raise_for_status()
+            
+            return {"status": "success", "actuator": actuator_name, "state": command.state}
+        
+        except httpx.RequestError:
+            # Prevent the engine from crashing if the simulator container is offline
+            raise HTTPException(status_code=503, detail="Simulator is unreachable")
+        except httpx.HTTPStatusError as e:
+            # Forward 400/404/500 errors from the simulator back to the frontend
+            raise HTTPException(status_code=e.response.status_code, detail="Simulator rejected the command")

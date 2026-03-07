@@ -24,3 +24,7 @@ class RuleUpdate(BaseModel):
 
 class RuleResponse(RuleCreate):
     id: int
+
+
+class ActuatorCommand(BaseModel):
+    state: str
