@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Dashboard from "./components/pages/Dashboard";
 import Sensors from "./components/pages/Sensors";
 import Topics from "./components/pages/Topics";
-import Actuators from "./components/pages/Actuators";
+import Controls from "./components/pages/Controls";
 import { APP } from './constants/app';
 import logo from './assets/mars.svg';
 import { useWebSocketService } from './services/webSocketService';
@@ -22,7 +22,7 @@ const App = () => {
             case PAGES.TELEMETRY:
                 return <Topics />;
             case PAGES.CONTROLS:
-                return <Actuators />;
+                return <Controls />;
             default:
                 return <Dashboard />;
         }

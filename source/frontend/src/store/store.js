@@ -4,12 +4,14 @@ import React, { createContext, useContext, useReducer } from "react";
 import { initialSensorsState, sensorsReducer } from "./slices/sensorsSlice";
 import { initialTopicsState, topicsReducer } from "./slices/topicsSlice";
 import { initialActuatorsState, actuatorsReducer } from "./slices/actuatorsSlice";
+import { initialRulesState, rulesReducer } from "./slices/rulesSlice";
 
 /* ---------------- STATE INIZIALE ---------------- */
 export const initialState = {
     sensors: initialSensorsState,
     topics: initialTopicsState,
     actuators: initialActuatorsState,
+    rules: initialRulesState,
 };
 
 /* ---------------- REDUCER COMBINATO ---------------- */
@@ -17,6 +19,7 @@ export const rootReducer = (state, action) => ({
     sensors: sensorsReducer(state.sensors, action),
     topics: topicsReducer(state.topics, action),
     actuators: actuatorsReducer(state.actuators, action),
+    rules: rulesReducer(state.rules, action),
 });
 
 /* ---------------- CONTEXT ---------------- */

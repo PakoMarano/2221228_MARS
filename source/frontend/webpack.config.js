@@ -15,6 +15,14 @@ module.exports = {
         port: 3000,
         hot: true,
         open: true,
+        proxy: [
+            {
+                context: ["/api"],
+                target: "http://localhost:4001",
+                changeOrigin: true,
+                pathRewrite: { "^/api": "" }
+            }
+        ]
     },
     module: {
         rules: [
