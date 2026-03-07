@@ -73,7 +73,32 @@ app.delete("/rules/:id", (req, res) => {
     res.json(deleted);
 });
 
+// -------------------- ACTUATORS --------------------
+
+// Stato iniziale degli actuators
+let actuators = {
+    cooling_fan: false,
+    entrance_humidifier: true,
+    hall_ventilation: false,
+    habitat_heater: false
+};
+
+// GET stato di tutti gli actuators
+app.get("/actuators", (req, res) => {
+    res.json(actuators);
+});
+
+// POST aggiorna lo stato di un actuator
+app.post("/actuators", (req, res) => {
+    const { key, value } = req.body;
+    if (!actuators.hasOwnProperty(key)) {
+        return res.status(404).json({ error: "Actuator not found" });
+    }
+    actuators[key] = !!value;
+    res.json({ key, value: actuators[key] });
+});
+
 // Avvia REST server
 app.listen(PORT, () => {
-    console.log(`Mock Rules REST server running on http://localhost:${PORT}`);
+    console.log(`Mock Rules + Actuators REST server running on http://localhost:${PORT}`);
 });

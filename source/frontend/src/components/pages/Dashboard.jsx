@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import SensorsCard from "../common/SensorsCard";
 import TopicsCard from "../common/TopicsCard";
 import ActuatorsCard from "../common/ActuatorsCard";
 import { PAGES } from "../../constants/navigation";
+import { useActuators } from "../../hooks/useActuators";
 
 const Dashboard = ({ goTo }) => {
+
+    const { fetchActuators } = useActuators();
+
+    useEffect(() => {
+        fetchActuators();
+    }, []);
+
     return (
         <div className="page dashboard-page">
 

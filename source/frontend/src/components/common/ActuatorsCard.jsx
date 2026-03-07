@@ -2,14 +2,17 @@ import React from "react";
 import Card from "../ui/Card";
 import { ACTUATORS } from "../../constants/enums/actuators";
 import { useStore } from "../../store/store";
-import { toggleActuator } from "../../store/slices/actuatorsSlice";
+import { useActuators } from "../../hooks/useActuators";
 
 const ActuatorsCard = ({ onConfigure }) => {
     const { state, dispatch } = useStore();
     const actuatorsState = state.actuators;
 
+    const { updateActuator } = useActuators();
+
     const handleToggle = (key) => {
-        dispatch(toggleActuator(key));
+        const currentValue = actuatorsState.values[key] || false;
+        updateActuator(key, !currentValue);
     };
 
     return (

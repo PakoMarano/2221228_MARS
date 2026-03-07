@@ -17,23 +17,39 @@ export const useRules = () => {
     const { dispatch } = useStore();
 
     const fetchRules = useCallback(async () => {
-        const response = await getRules();
-        dispatch(setRules(response.data));
+        try {
+            const response = await getRules();
+            dispatch(setRules(response.data));
+        } catch (err) {
+            console.error("Failed to fetch rules:", err);
+        }
     }, [dispatch]);
 
     const createNewRule = useCallback(async (rule) => {
-        const response = await createRule(rule);
-        dispatch(addRule(response.data));
+        try {
+            const response = await createRule(rule);
+            dispatch(addRule(response.data));
+        } catch (err) {
+            console.error("Failed to create rule:", err);
+        }
     }, [dispatch]);
 
     const updateExistingRule = useCallback(async (id, updates) => {
-        const response = await updateRuleApi(id, updates);
-        dispatch(updateRule(id, response.data));
+        try {
+            const response = await updateRuleApi(id, updates);
+            dispatch(updateRule(id, response.data));
+        } catch (err) {
+            console.error(`Failed to update rule with id ${id}:`, err);
+        }
     }, [dispatch]);
 
     const removeRule = useCallback(async (id) => {
-        await deleteRuleApi(id);
-        dispatch(deleteRule(id));
+        try {
+            await deleteRuleApi(id);
+            dispatch(deleteRule(id));
+        } catch (err) {
+            console.error(`Failed to delete rule with id ${id}:`, err);
+        }
     }, [dispatch]);
 
     return {

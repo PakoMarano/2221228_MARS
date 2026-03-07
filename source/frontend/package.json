@@ -3,7 +3,7 @@
   "scripts": {
     "start": "webpack serve --env development",
     "mock:sensors": "node mockSensorsServer.js",
-    "mock:rules": "node mockRulesServer.js",
+    "mock:rules": "node mockRESTServer.js",
     "mock": "concurrently \"npm run mock:sensors\" \"npm run mock:rules\"",
     "build": "webpack --env production"
   },
