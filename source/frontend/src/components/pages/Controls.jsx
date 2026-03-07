@@ -112,6 +112,9 @@ const Controls = () => {
                         <th onClick={() => handleSort("setTo")} style={{ cursor: "pointer" }}>
                             Set To {getSortIcon("setTo")}
                         </th>
+                        <th onClick={() => handleSort("status")} style={{ cursor: "pointer" }}>
+                            Status {getSortIcon("status")}
+                        </th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -131,6 +134,9 @@ const Controls = () => {
                                 <td>{rule.threshold}</td>
                                 <td>{actuatorLabel}</td>
                                 <td>{rule.setTo}</td>
+                                <td>
+                                    {rule.status ? "Active" : "Inactive"}
+                                </td>
                                 <td className="actions-cell">
                                     <i
                                         className="bi bi-pencil-fill"

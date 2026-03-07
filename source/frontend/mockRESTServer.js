@@ -13,7 +13,8 @@ let rules = [
         operator: ">",
         threshold: 28,
         actuator: "cooling_fan",
-        setTo: "ON"
+        setTo: "ON",
+        status: true
     },
     {
         id: 2,
@@ -21,7 +22,8 @@ let rules = [
         operator: "<=",
         threshold: 40,
         actuator: "entrance_humidifier",
-        setTo: "OFF"
+        setTo: "OFF",
+        status: false
     }
 ];
 
@@ -34,14 +36,15 @@ app.get("/rules", (req, res) => {
 
 // POST aggiunge una nuova regola
 app.post("/rules", (req, res) => {
-    const { sensorId, operator, threshold, actuator, setTo } = req.body;
+    const { sensorId, operator, threshold, actuator, setTo, status } = req.body;
     const newRule = {
         id: nextRuleId++,
         sensorId,
         operator,
         threshold,
         actuator,
-        setTo
+        setTo,
+        status
     };
     rules.push(newRule);
     res.json(newRule);
@@ -50,7 +53,7 @@ app.post("/rules", (req, res) => {
 // PUT modifica una regola
 app.put("/rules/:id", (req, res) => {
     const { id } = req.params;
-    const { sensorId, operator, threshold, actuator, setTo } = req.body;
+    const { sensorId, operator, threshold, actuator, setTo, status } = req.body;
     const rule = rules.find(r => r.id === parseInt(id));
     if (!rule) return res.status(404).json({ error: "Rule not found" });
 
@@ -59,6 +62,7 @@ app.put("/rules/:id", (req, res) => {
     rule.threshold = threshold ?? rule.threshold;
     rule.actuator = actuator ?? rule.actuator;
     rule.setTo = setTo ?? rule.setTo;
+    rule.status = status ?? rule.status;
 
     res.json(rule);
 });
