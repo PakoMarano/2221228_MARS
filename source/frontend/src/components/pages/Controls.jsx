@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useStore } from "../../store/store";
 import { ACTUATORS } from "../../constants/enums/actuators";
 import { SENSORS } from "../../constants/enums/sensors";
@@ -12,7 +12,7 @@ const Controls = () => {
     const { state, dispatch } = useStore();
     const rules = getAllRules(state.rules);
 
-    const { fetchRules, createNewRule, updateExistingRule, removeRule } = useRules();
+    const { createNewRule, updateExistingRule, removeRule, toggleRuleStatus } = useRules();
 
     const [deleteId, setDeleteId] = useState(null);
     const [editingRule, setEditingRule] = useState(null);
@@ -88,9 +88,10 @@ const Controls = () => {
         setRuleModalOpen(false);
     };
 
-    useEffect(() => {
-        fetchRules();
-    }, []);
+    const handleToggleStatus = async (ruleId, currentStatus) => {
+        const newStatus = !currentStatus;
+        await toggleRuleStatus(ruleId, newStatus);
+    };
 
     return (
         <div className="page actuators-page">
@@ -138,15 +139,25 @@ const Controls = () => {
                                     {rule.status ? "Active" : "Inactive"}
                                 </td>
                                 <td className="actions-cell">
-                                    <i
-                                        className="bi bi-pencil-fill"
-                                        onClick={() => handleEdit(rule)}
-                                    ></i>
+                                    <div>
+                                        <i
+                                            className="bi bi-pencil-fill"
+                                            onClick={() => handleEdit(rule)}
+                                        ></i>
 
-                                    <i
-                                        className="bi bi-trash-fill"
-                                        onClick={() => handleDelete(rule.id)}
-                                    ></i>
+                                        <i
+                                            className="bi bi-trash-fill"
+                                            onClick={() => handleDelete(rule.id)}
+                                        ></i>
+                                    </div>
+                                    <label className="switch" style={{ marginLeft: "10px" }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={rule.status}
+                                            onChange={() => handleToggleStatus(rule.id, rule.status)}
+                                        />
+                                        <span className="switch-slider"></span>
+                                    </label>
                                 </td>
                             </tr>
                         );

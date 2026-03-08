@@ -440,6 +440,11 @@
   background-color: #3a3e4b;
 }
 
+.actions-cell {
+  display: flex;
+  justify-content: space-between;
+}
+
 .actions-cell i {
   cursor: pointer;
   margin-right: 8px;

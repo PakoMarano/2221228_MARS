@@ -4,13 +4,16 @@ import TopicsCard from "../common/TopicsCard";
 import ActuatorsCard from "../common/ActuatorsCard";
 import { PAGES } from "../../constants/navigation";
 import { useActuators } from "../../hooks/useActuators";
+import { useRules } from "../../hooks/useRules";
 
 const Dashboard = ({ goTo }) => {
 
     const { fetchActuators } = useActuators();
+    const { fetchRules } = useRules();
 
     useEffect(() => {
         fetchActuators();
+        fetchRules();
     }, []);
 
     return (

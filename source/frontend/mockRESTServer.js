@@ -67,6 +67,16 @@ app.put("/rules/:id", (req, res) => {
     res.json(rule);
 });
 
+app.put("/rules/:id/status", (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const rule = rules.find(r => r.id === parseInt(id));
+    if (!rule) return res.status(404).json({ error: "Rule not found" });
+
+    rule.status = status;
+    res.json(rule);
+});
+
 // DELETE elimina una regola
 app.delete("/rules/:id", (req, res) => {
     const { id } = req.params;

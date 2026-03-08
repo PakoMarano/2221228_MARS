@@ -4,13 +4,14 @@ import {
     setRules,
     addRule,
     updateRule,
-    deleteRule
+    deleteRule,
 } from "../store/slices/rulesSlice";
 import {
     getRules,
     createRule,
     updateRule as updateRuleApi,
-    deleteRule as deleteRuleApi
+    deleteRule as deleteRuleApi,
+    updateRuleStatusApi
 } from "../services/rulesService";
 
 export const useRules = () => {
@@ -52,10 +53,20 @@ export const useRules = () => {
         }
     }, [dispatch]);
 
+    const toggleRuleStatus = useCallback(async (id, status) => {
+        try {
+            const response = await updateRuleStatusApi(id, status);
+            dispatch(updateRule(id, response.data));
+        } catch (err) {
+            console.error(`Failed to update status for rule ${id}:`, err);
+        }
+    }, [dispatch]);
+
     return {
         fetchRules,
         createNewRule,
         updateExistingRule,
-        removeRule
+        removeRule,
+        toggleRuleStatus,
     };
 };

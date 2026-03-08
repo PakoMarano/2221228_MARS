@@ -15,3 +15,7 @@ export const updateRule = (id, rule) => {
 export const deleteRule = (id) => {
     return api.delete(`/rules/${id}`);
 };
+
+export const updateRuleStatusApi = (id, status) => {
+    return api.put(`/rules/${id}/status`, { status });
+};

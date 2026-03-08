@@ -26,7 +26,6 @@ const RuleModal = ({ isOpen, onClose, onSave, rule }) => {
         threshold: 0,
         actuator: defaultActuator,
         setTo: "ON",
-        status: true,
     });
 
     useEffect(() => {
@@ -39,7 +38,6 @@ const RuleModal = ({ isOpen, onClose, onSave, rule }) => {
                 threshold: 0,
                 actuator: defaultActuator,
                 setTo: "ON",
-                status: true,
             });
         }
     }, [rule, defaultSensor, defaultActuator]);
@@ -115,16 +113,6 @@ const RuleModal = ({ isOpen, onClose, onSave, rule }) => {
                 >
                     <option value="ON">ON</option>
                     <option value="OFF">OFF</option>
-                </select>
-
-                <label>Status</label>
-                <select
-                    id="status"
-                    value={form.status}
-                    onChange={(e) => handleChange("status", e.target.value === "true")}
-                >
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
                 </select>
             </div>
         </Modal>
