@@ -63,7 +63,7 @@ async def run_worker():
                         response.raise_for_status()
                         
                         # 2. Broadcast the state change so the UI can update
-                        await kafka_client.send_event(TOPIC_ACTUATORS, {"actuator": target, "state": state})
+                        await kafka_client.send_event(TOPIC_ACTUATORS, {"actuator": target, "state": state, "rule_id": rule['id']})
                         
                     except httpx.RequestError as e:
                         print(f"Failed to reach simulator for rule {rule['id']}: {e}")

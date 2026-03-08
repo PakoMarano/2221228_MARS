@@ -6,11 +6,23 @@ from fastapi import FastAPI, HTTPException
 from typing import List
 
 from app.database import get_db_connection, init_db
-from app.model import RuleCreate, RuleResponse, RuleUpdate, ActuatorCommand
+from app.model import RuleCreate, RuleResponse, RuleUpdate, RuleStatusUpdate, ActuatorCommand
 from app.kafka_client.kafka_producer import kafka_client
 
 SIMULATOR_URL = os.getenv("SIMULATOR_URL", "http://localhost:8080")
 TOPIC_ACTUATORS = os.getenv("TOPIC_ACTUATORS", "actuator-events")
+
+
+def normalize_actuator_state(state: str | bool) -> str:
+    if isinstance(state, bool):
+        return "ON" if state else "OFF"
+
+    normalized = state.strip().upper()
+    if normalized == "TRUE":
+        return "ON"
+    if normalized == "FALSE":
+        return "OFF"
+    return normalized
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -80,6 +92,24 @@ async def update_rule(rule_id: int, rule_update: RuleUpdate):
 
     return dict(updated_row)
 
+
+@app.patch("/api/rules/{rule_id}/status", response_model=RuleResponse)
+async def update_rule_status(rule_id: int, status_update: RuleStatusUpdate):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE rules SET active = ? WHERE id = ?", (int(status_update.active), rule_id))
+    conn.commit()
+
+    if cursor.rowcount == 0:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Rule not found")
+
+    cursor.execute("SELECT * FROM rules WHERE id = ?", (rule_id,))
+    updated_row = cursor.fetchone()
+    conn.close()
+
+    return dict(updated_row)
+
 @app.delete("/api/rules/{rule_id}")
 async def delete_rule(rule_id: int):
     conn = get_db_connection()
@@ -98,19 +128,21 @@ async def delete_rule(rule_id: int):
 async def manual_actuator_override(actuator_name: str, command: ActuatorCommand):
     async with httpx.AsyncClient() as client:
         try:
+            normalized_state = normalize_actuator_state(command.state)
+
             # Forward the exact payload format the simulator expects
             response = await client.post(
                 f"{SIMULATOR_URL}/api/actuators/{actuator_name}",
-                json={"state": command.state},
+                json={"state": normalized_state},
                 timeout=3.0
             )
             response.raise_for_status()
             
             # If simulator accepts the command, broadcast the state change to Kafka
-            event_payload = {"actuator": actuator_name, "state": command.state}
+            event_payload = {"actuator": actuator_name, "state": normalized_state}
             await kafka_client.send_event(TOPIC_ACTUATORS, event_payload)
             
-            return {"status": "success", "actuator": actuator_name, "state": command.state}
+            return {"status": "success", "actuator": actuator_name, "state": normalized_state}
         
         except httpx.RequestError:
             # Prevent the engine from crashing if the simulator container is offline

@@ -1,30 +1,41 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RuleCreate(BaseModel):
-    sensor_id: str
+    # Allow both snake_case and camelCase inputs, serialize using API aliases.
+    model_config = ConfigDict(populate_by_name=True)
+
+    sensor_id: str = Field(alias="sensorId")
     operator: str
     # Stored as TEXT because some sensors (e.g. airlock) send string values like "IDLE" instead of numbers
-    threshold_value: str
-    actuator_target: str
-    actuator_state: str
-    active: bool = True
+    threshold_value: str = Field(alias="threshold")
+    actuator_target: str = Field(alias="actuator")
+    actuator_state: str = Field(alias="setTo")
+    active: bool = Field(default=True, alias="status")
 
 
 class RuleUpdate(BaseModel):
-    sensor_id: Optional[str] = None
+    model_config = ConfigDict(populate_by_name=True)
+
+    sensor_id: Optional[str] = Field(default=None, alias="sensorId")
     operator: Optional[str] = None
-    threshold_value: Optional[str] = None
-    actuator_target: Optional[str] = None
-    actuator_state: Optional[str] = None
-    active: Optional[bool] = None
+    threshold_value: Optional[str] = Field(default=None, alias="threshold")
+    actuator_target: Optional[str] = Field(default=None, alias="actuator")
+    actuator_state: Optional[str] = Field(default=None, alias="setTo")
+    active: Optional[bool] = Field(default=None, alias="status")
 
 
 class RuleResponse(RuleCreate):
     id: int
 
 
+class RuleStatusUpdate(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    active: bool = Field(alias="status")
+
+
 class ActuatorCommand(BaseModel):
-    state: str
+    state: str | bool
