@@ -116,6 +116,9 @@ const Controls = () => {
                         <th onClick={() => handleSort("status")} style={{ cursor: "pointer" }}>
                             Status {getSortIcon("status")}
                         </th>
+                        <th onClick={() => handleSort("lastTriggered")} style={{ cursor: "pointer" }}>
+                            Last Triggered {getSortIcon("lastTriggered")}
+                        </th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -137,6 +140,9 @@ const Controls = () => {
                                 <td>{rule.setTo}</td>
                                 <td>
                                     {rule.status ? "Active" : "Inactive"}
+                                </td>
+                                <td>
+                                    {rule.lastTriggered ? new Date(rule.lastTriggered).toLocaleTimeString() : "-"}
                                 </td>
                                 <td className="actions-cell">
                                     <div>

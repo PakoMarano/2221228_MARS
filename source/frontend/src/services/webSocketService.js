@@ -3,6 +3,7 @@ import { useStore } from "../store/store";
 import { addSensorValue } from "../store/slices/sensorsSlice";
 import { addTopicValue } from "../store/slices/topicsSlice";
 import { setActuator } from "../store/slices/actuatorsSlice";
+import { updateRule } from "../store/slices/rulesSlice";
 
 const WS_URL = "ws://localhost:4000";
 
@@ -47,6 +48,10 @@ export const useWebSocketService = () => {
 
                     case "actuator":
                         dispatch(setActuator(key, value));
+                        const triggeredRuleId = Number(metric);
+                        if (!isNaN(triggeredRuleId)) {
+                            dispatch(updateRule(triggeredRuleId, { lastTriggered: timestamp }));
+                        }
                         break;
 
                     default:

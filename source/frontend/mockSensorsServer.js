@@ -179,6 +179,11 @@ const getRandomValue = (metric, category) => {
     }
 };
 
+// genera un numero casuale da 1 a max, più piccolo ha più probabilità
+const getWeightedRandomRuleId = (max = 30) => {
+    return Math.floor(1 + (Math.random() ** 2) * (max - 1));
+};
+
 // invia messaggi casuali ogni 1-2 secondi
 const sendRandomUpdate = (ws) => {
 
@@ -218,6 +223,7 @@ const sendRandomUpdate = (ws) => {
     } else {
 
         value = getRandomValue(null, "actuator");
+        metric = getWeightedRandomRuleId(30).toString();
 
     }
 
