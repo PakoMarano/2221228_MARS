@@ -57,7 +57,7 @@ const Sensors = () => {
                 </div>
             </div>
 
-            <div className="card-grid cols-4">
+            <div className="card-grid cols-3">
                 {filteredSensors.map(sensor => (
                     <div key={sensor.key} className="sensors-card">
                         <Chart

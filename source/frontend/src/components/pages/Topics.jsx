@@ -57,7 +57,7 @@ const Topics = () => {
                 </div>
             </div>
 
-            <div className="card-grid cols-4">
+            <div className="card-grid cols-3">
                 {filteredTopics.map(topic => (
                     <div key={topic.key} className="sensors-card">
                         <Chart
