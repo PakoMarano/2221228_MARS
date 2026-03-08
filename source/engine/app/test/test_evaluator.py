@@ -1,4 +1,4 @@
-from evaluator import evaluate_rule
+from app.evaluator import evaluate_rule
 
 # Mock rules mimicking SQLite rows
 rule_temp = {

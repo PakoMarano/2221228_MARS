@@ -21,8 +21,8 @@ class EventConsumer:
                     self.topic,
                     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
                     value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-                    group_id="engine-worker-group", 
-                    auto_offset_reset="latest" 
+                    group_id="engine-worker-group", # Prevents duplicate processing by ensuring multiple worker instances (if necessary) share the partition load.
+                    auto_offset_reset="latest" # Ignores historical data on startup to avoid firing actuators for past telemetry states.
                 )
                 await self.consumer.start()
                 print(f"Consumer connected to topic '{self.topic}' at {KAFKA_BOOTSTRAP_SERVERS}")

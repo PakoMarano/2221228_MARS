@@ -5,9 +5,9 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from typing import List
 
-from database import get_db_connection, init_db
-from model import RuleCreate, RuleResponse, RuleUpdate, ActuatorCommand
-from kafka_client.kafka_producer import kafka_client
+from app.database import get_db_connection, init_db
+from app.model import RuleCreate, RuleResponse, RuleUpdate, ActuatorCommand
+from app.kafka_client.kafka_producer import kafka_client
 
 SIMULATOR_URL = os.getenv("SIMULATOR_URL", "http://localhost:8080")
 TOPIC_ACTUATORS = os.getenv("TOPIC_ACTUATORS", "actuator-events")
