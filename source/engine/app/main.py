@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import os
 
 import httpx
 from fastapi import FastAPI, HTTPException
@@ -6,13 +7,17 @@ from typing import List
 
 from database import get_db_connection, init_db
 from model import RuleCreate, RuleResponse, RuleUpdate, ActuatorCommand
+from kafka_client.kafka_producer import kafka_client
 
-SIMULATOR_URL = "http://localhost:8080"
+SIMULATOR_URL = os.getenv("SIMULATOR_URL", "http://localhost:8080")
+TOPIC_ACTUATORS = os.getenv("TOPIC_ACTUATORS", "actuator-events")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    await kafka_client.start()
     yield
+    await kafka_client.stop()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -34,7 +39,7 @@ async def create_rule(rule: RuleCreate):
     conn.commit()
     conn.close()
     
-    return {**rule.dict(), "id": rule_id}
+    return {**rule.model_dump(), "id": rule_id}
 
 @app.get("/rules", response_model=List[RuleResponse])
 async def get_rules():
@@ -49,7 +54,7 @@ async def get_rules():
 
 @app.patch("/rules/{rule_id}", response_model=RuleResponse)
 async def update_rule(rule_id: int, rule_update: RuleUpdate):
-    updates = rule_update.dict(exclude_unset=True)
+    updates = rule_update.model_dump(exclude_unset=True)
     if not updates:
         raise HTTPException(status_code=400, detail="No fields provided to update")
 
@@ -100,6 +105,10 @@ async def manual_actuator_override(actuator_name: str, command: ActuatorCommand)
                 timeout=3.0
             )
             response.raise_for_status()
+            
+            # If simulator accepts the command, broadcast the state change to Kafka
+            event_payload = {"actuator": actuator_name, "state": command.state}
+            await kafka_client.send_event(TOPIC_ACTUATORS, event_payload)
             
             return {"status": "success", "actuator": actuator_name, "state": command.state}
         
