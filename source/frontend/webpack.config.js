@@ -2,6 +2,8 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
+const USE_DOCKER = process.env.USE_DOCKER === "false";
+
 const REST_PROTOCOL = process.env.REST_PROTOCOL || "http";
 const REST_HOST = process.env.REST_HOST || "localhost";
 const REST_PORT = process.env.REST_PORT || "4001";
@@ -29,7 +31,7 @@ module.exports = {
                 context: ["/api"],
                 target: `${REST_PROTOCOL}://${REST_HOST}:${REST_PORT}`,
                 changeOrigin: true,
-                pathRewrite: { "^/api": "" }
+                ...(USE_DOCKER ? {} : { pathRewrite: { "^/api": "" } })
             }
         ]
     },

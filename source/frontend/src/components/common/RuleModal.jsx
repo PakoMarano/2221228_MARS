@@ -26,6 +26,7 @@ const RuleModal = ({ isOpen, onClose, onSave, rule }) => {
         threshold: 0,
         actuator: defaultActuator,
         setTo: "ON",
+        status: true,
     });
 
     useEffect(() => {
@@ -38,6 +39,7 @@ const RuleModal = ({ isOpen, onClose, onSave, rule }) => {
                 threshold: 0,
                 actuator: defaultActuator,
                 setTo: "ON",
+                status: true,
             });
         }
     }, [rule, defaultSensor, defaultActuator]);
