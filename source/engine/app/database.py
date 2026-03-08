@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_FILE = "rules.db"
+DB_FILE = "app/rules.db"
 
 
 def get_db_connection():
