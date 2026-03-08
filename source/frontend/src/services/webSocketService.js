@@ -5,7 +5,7 @@ import { addTopicValue } from "../store/slices/topicsSlice";
 import { setActuator } from "../store/slices/actuatorsSlice";
 import { updateRule } from "../store/slices/rulesSlice";
 
-const WS_URL = "ws://localhost:4000";
+const WS_URL = `${process.env.WS_PROTOCOL}://${process.env.WS_HOST}:${process.env.WS_PORT}`;
 
 export const useWebSocketService = () => {
     const { dispatch } = useStore();

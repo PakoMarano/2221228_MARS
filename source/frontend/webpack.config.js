@@ -1,5 +1,14 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
+
+const REST_PROTOCOL = process.env.REST_PROTOCOL || "http";
+const REST_HOST = process.env.REST_HOST || "localhost";
+const REST_PORT = process.env.REST_PORT || "4001";
+
+const WS_PROTOCOL = process.env.WS_PROTOCOL || "ws";
+const WS_HOST = process.env.WS_HOST || "localhost";
+const WS_PORT = process.env.WS_PORT || "4000";
 
 module.exports = {
     mode: "development",
@@ -11,17 +20,14 @@ module.exports = {
     },
     devtool: 'cheap-module-source-map',
     devServer: {
-        static: [
-            path.join(__dirname, 'dist'),
-            path.join(__dirname, 'public')
-        ],
+        static: [path.join(__dirname, 'dist'), path.join(__dirname, 'public')],
         port: 3000,
         hot: true,
         open: true,
         proxy: [
             {
                 context: ["/api"],
-                target: "http://localhost:4001",
+                target: `${REST_PROTOCOL}://${REST_HOST}:${REST_PORT}`,
                 changeOrigin: true,
                 pathRewrite: { "^/api": "" }
             }
@@ -35,32 +41,25 @@ module.exports = {
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: [
-                            '@babel/preset-env',
-                            '@babel/preset-react'
-                        ]
+                        presets: ['@babel/preset-env', '@babel/preset-react']
                     }
-                },
+                }
             },
-            {
-                test: /\.css$/,
-                use: [
-                    'style-loader',
-                    'css-loader',
-                ],
-            },
-            {
-                test: /\.(png|jpe?g|gif|svg)$/i,
-                type: 'asset/resource',
-            }
+            { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+            { test: /\.(png|jpe?g|gif|svg)$/i, type: 'asset/resource' }
         ],
     },
-    resolve: {
-        extensions: ['.js', '.jsx'],
-    },
+    resolve: { extensions: ['.js', '.jsx'] },
     plugins: [
-        new HtmlWebpackPlugin({
-            template: './public/index.html',
-        }),
-    ],
+        new HtmlWebpackPlugin({ template: './public/index.html' }),
+        new webpack.DefinePlugin({
+            'process.env.USE_DOCKER': JSON.stringify(process.env.USE_DOCKER || "false"),
+            'process.env.REST_PROTOCOL': JSON.stringify(REST_PROTOCOL),
+            'process.env.REST_HOST': JSON.stringify(REST_HOST),
+            'process.env.REST_PORT': JSON.stringify(REST_PORT),
+            'process.env.WS_PROTOCOL': JSON.stringify(WS_PROTOCOL),
+            'process.env.WS_HOST': JSON.stringify(WS_HOST),
+            'process.env.WS_PORT': JSON.stringify(WS_PORT),
+        })
+    ]
 };
