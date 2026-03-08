@@ -25,7 +25,7 @@ app = FastAPI(lifespan=lifespan)
 # (e.g., Rule A turns fan ON, Rule B turns fan OFF for the same threshold).
 # Building a conflict-resolution or priority graph is out of scope.
 # Resolving logical contradictions is delegated to the dashboard user.
-@app.post("/rules", response_model=RuleResponse)
+@app.post("/api/rules", response_model=RuleResponse)
 async def create_rule(rule: RuleCreate):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -41,7 +41,7 @@ async def create_rule(rule: RuleCreate):
     
     return {**rule.model_dump(), "id": rule_id}
 
-@app.get("/rules", response_model=List[RuleResponse])
+@app.get("/api/rules", response_model=List[RuleResponse])
 async def get_rules():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -52,7 +52,7 @@ async def get_rules():
     return [dict(row) for row in rows]
 
 
-@app.patch("/rules/{rule_id}", response_model=RuleResponse)
+@app.patch("/api/rules/{rule_id}", response_model=RuleResponse)
 async def update_rule(rule_id: int, rule_update: RuleUpdate):
     updates = rule_update.model_dump(exclude_unset=True)
     if not updates:
@@ -80,7 +80,7 @@ async def update_rule(rule_id: int, rule_update: RuleUpdate):
 
     return dict(updated_row)
 
-@app.delete("/rules/{rule_id}")
+@app.delete("/api/rules/{rule_id}")
 async def delete_rule(rule_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -94,7 +94,7 @@ async def delete_rule(rule_id: int):
     
     return {"status": "success", "deleted_id": rule_id}
 
-@app.post("/actuators/{actuator_name}")
+@app.post("/api/actuators/{actuator_name}")
 async def manual_actuator_override(actuator_name: str, command: ActuatorCommand):
     async with httpx.AsyncClient() as client:
         try:
