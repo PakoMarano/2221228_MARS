@@ -118,3 +118,6 @@ async def manual_actuator_override(actuator_name: str, command: ActuatorCommand)
         except httpx.HTTPStatusError as e:
             # Forward 400/404/500 errors from the simulator back to the frontend
             raise HTTPException(status_code=e.response.status_code, detail="Simulator rejected the command")
+        
+# WHY NO GET ENDPOINT?
+# The physical simulator is write-only and lacks actuators state feedback.
