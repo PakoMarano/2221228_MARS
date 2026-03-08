@@ -3,9 +3,10 @@ import { ACTUATORS } from "../../constants/enums/actuators";
 /* ---------------- STATO INIZIALE ---------------- */
 export const initialActuatorsState = {
     values: Object.values(ACTUATORS).reduce((acc, actuator) => {
-        acc[actuator.key] = false; // inizialmente spenti
+        acc[actuator.key] = false;
         return acc;
-    }, {})
+    }, {}),
+    lastUpdated: {}
 };
 
 /* ---------------- AZIONI ---------------- */
@@ -16,15 +17,15 @@ export const ACTUATORS_ACTIONS = {
 };
 
 /* Action creator per toggle singolo */
-export const toggleActuator = (key) => ({
+export const toggleActuator = (key, timestamp) => ({
     type: ACTUATORS_ACTIONS.TOGGLE,
-    payload: key
+    payload: { key, timestamp }
 });
 
 /* Action creator per impostare uno stato specifico */
-export const setActuator = (key, value) => ({
+export const setActuator = (key, value, timestamp) => ({
     type: ACTUATORS_ACTIONS.SET,
-    payload: { key, value }
+    payload: { key, value, timestamp }
 });
 
 /* Action creator batch */
@@ -38,37 +39,51 @@ export const actuatorsReducer = (state, action) => {
     switch (action.type) {
 
         case ACTUATORS_ACTIONS.TOGGLE: {
-            const key = action.payload;
+            const { key, timestamp } = action.payload;
             return {
                 ...state,
                 values: {
                     ...state.values,
                     [key]: !state.values[key]
+                },
+                lastUpdated: {
+                    ...state.lastUpdated,
+                    [key]: timestamp ?? Date.now()
                 }
             };
         }
 
         case ACTUATORS_ACTIONS.SET: {
-            const { key, value } = action.payload;
+            const { key, value, timestamp } = action.payload;
             return {
                 ...state,
                 values: {
                     ...state.values,
                     [key]: !!value
+                },
+                lastUpdated: {
+                    ...state.lastUpdated,
+                    [key]: timestamp ?? Date.now()
                 }
             };
         }
 
         case ACTUATORS_ACTIONS.SET_BATCH: {
             const newValues = { ...state.values };
-            Object.entries(action.payload).forEach(([key, value]) => {
+            const newLastUpdated = { ...state.lastUpdated };
+
+            Object.entries(action.payload).forEach(([key, item]) => {
+                // item = { value, timestamp }
                 if (newValues.hasOwnProperty(key)) {
-                    newValues[key] = !!value;
+                    newValues[key] = !!item.value;
+                    newLastUpdated[key] = item.timestamp ?? newLastUpdated[key];
                 }
             });
+
             return {
                 ...state,
-                values: newValues
+                values: newValues,
+                lastUpdated: newLastUpdated
             };
         }
 

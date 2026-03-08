@@ -1,104 +1,106 @@
-// mockServer.js
 const WebSocket = require("ws");
 
 const SENSORS = {
     greenhouse_temperature: {
         key: "greenhouse_temperature",
-        label: "Greenhouse Temperature",
-        unit: "°C"
+        metric: ["temperature"],
+        unit: ["C"],
+        status: true,
     },
     entrance_humidity: {
         key: "entrance_humidity",
-        label: "Entrance Humidity",
-        unit: "%"
+        metric: ["percentage"],
+        unit: ["%"],
+        status: true,
     },
     co2_hall: {
         key: "co2_hall",
-        label: "CO₂ Hall",
-        unit: "ppm"
+        metric: ["ppm"],
+        unit: ["ppm"],
+        status: true,
     },
     hydroponic_ph: {
         key: "hydroponic_ph",
-        label: "Hydroponic pH",
-        unit: "pH"
+        metric: ["ph"],
+        unit: ["pH"],
+        status: true,
     },
     water_tank_level: {
         key: "water_tank_level",
-        label: "Water Tank Level",
-        unit: "L"
+        metric: ["liters", "percentage"],
+        unit: ["l", "%"],
+        status: true,
     },
     corridor_pressure: {
         key: "corridor_pressure",
-        label: "Corridor Pressure",
-        unit: "Pa"
+        metric: ["pressure_kpa"],
+        unit: ["kPa"],
+        status: true,
     },
     air_quality_pm25: {
         key: "air_quality_pm25",
-        label: "Air Quality PM2.5",
-        unit: "µg/m³"
+        metric: ["p1", "p25", "p10"],
+        unit: ["ug/m3", "ug/m3", "ug/m3"],
+        status: true,
     },
     air_quality_voc: {
         key: "air_quality_voc",
-        label: "Air Quality VOC",
-        unit: "ppb"
+        metric: ["voc_ppb", "co2e_ppm"],
+        unit: ["ppb", "ppm"],
+        status: true,
     },
 };
 
 const TOPICS = {
     solar_array: {
         key: "solar_array",
-        label: "Solar Array",
-        unit: "kW"
+        metric: ["power", "voltage", "current", "cumulative"],
+        unit: ["kw", "v", "a", "kwh"],
+        status: null,
     },
     radiation: {
         key: "radiation",
-        label: "Radiation",
-        unit: "mSv/h"
+        metric: ["radiation"],
+        unit: ["uSv/h"],
+        status: true,
     },
     life_support: {
         key: "life_support",
-        label: "Life Support",
-        unit: null
+        metric: ["oxigen_percent"],
+        unit: ["%"],
+        status: true,
     },
     thermal_loop: {
         key: "thermal_loop",
-        label: "Thermal Loop",
-        unit: "°C"
+        metric: ["temperature", "flow"],
+        unit: ["C", "l_min"],
+        status: true,
     },
     power_bus: {
         key: "power_bus",
-        label: "Power Bus",
-        unit: "V"
+        metric: ["power", "voltage", "current", "cumulative"],
+        unit: ["kw", "v", "a", "kwh"],
+        status: null,
     },
     power_consumption: {
         key: "power_consumption",
-        label: "Power Consumption",
-        unit: "kW"
+        metric: ["power", "voltage", "current", "cumulative"],
+        unit: ["kw", "v", "a", "kwh"],
+        status: null,
     },
     airlock: {
         key: "airlock",
-        label: "Airlock",
-        unit: null
+        metric: ["cycles_per_hour", "state"],
+        unit: ["cycles", "state"],
+        status: null,
     },
 };
 
 const ACTUATORS = {
-    cooling_fan: {
-        key: "cooling_fan",
-        label: "Cooling Fan",
-    },
-    entrance_humidifier: {
-        key: "entrance_humidifier",
-        label: "Entrance Humidifier",
-    },
-    hall_ventilation: {
-        key: "hall_ventilation",
-        label: "Hall Ventilation",
-    },
-    habitat_heater: {
-        key: "habitat_heater",
-        label: "Habitat Heater",
-    },
+    cooling_fan: { key: "cooling_fan" },
+    entrance_humidifier: { key: "entrance_humidifier" },
+    hall_ventilation: { key: "hall_ventilation" },
+    habitat_heater: { key: "habitat_heater" },
 };
 
 const PORT = 4000;
@@ -106,62 +108,131 @@ const wss = new WebSocket.Server({ port: PORT });
 
 console.log(`Mock WebSocket server running on ws://localhost:${PORT}`);
 
-const getRandomValue = (key, category) => {
-    if (category === "sensor") {
-        switch (key) {
-            case "greenhouse_temperature": return +(20 + Math.random() * 5).toFixed(1);
-            case "entrance_humidity": return Math.floor(40 + Math.random() * 20);
-            case "co2_hall": return Math.floor(380 + Math.random() * 50);
-            case "hydroponic_ph": return +(6 + Math.random()).toFixed(1);
-            case "water_tank_level": return Math.floor(100 + Math.random() * 50);
-            case "corridor_pressure": return 101325 + Math.floor(Math.random() * 500);
-            case "air_quality_pm25": return Math.floor(Math.random() * 20);
-            case "air_quality_voc": return Math.floor(Math.random() * 200);
-            default: return 0;
-        }
-    } else if (category === "topic") {
-        switch (key) {
-            case "solar_array": return Math.floor(Math.random() * 200);
-            case "radiation": return +(Math.random() * 0.1).toFixed(3);
-            case "life_support": return Math.random() > 0.1 ? "OK" : "FAIL";
-            case "thermal_loop": return +(15 + Math.random() * 5).toFixed(1);
-            case "power_bus": return 400 + Math.floor(Math.random() * 20);
-            case "power_consumption": return +(50 + Math.random() * 50).toFixed(1);
-            case "airlock": return Math.random() > 0.5 ? "Open" : "Closed";
-            default: return 0;
-        }
-    } else if (category === "actuator") {
-        return Math.random() > 0.5;
+const getRandomStatus = (statusEnabled) => {
+    if (!statusEnabled) return null;
+    return Math.random() > 0.8 ? "WARNING" : "OK";
+};
+
+const getRandomValue = (metric, category) => {
+
+    switch (metric) {
+
+        case "temperature":
+            return +(15 + Math.random() * 10).toFixed(1);
+
+        case "percentage":
+        case "oxigen_percent":
+            return Math.floor(30 + Math.random() * 70);
+
+        case "ppm":
+            return Math.floor(350 + Math.random() * 100);
+
+        case "ph":
+            return +(5.5 + Math.random() * 2).toFixed(2);
+
+        case "liters":
+            return Math.floor(80 + Math.random() * 70);
+
+        case "pressure_kpa":
+            return +(95 + Math.random() * 10).toFixed(2);
+
+        case "p1":
+        case "p25":
+        case "p10":
+            return Math.floor(Math.random() * 40);
+
+        case "voc_ppb":
+            return Math.floor(Math.random() * 500);
+
+        case "co2e_ppm":
+            return Math.floor(400 + Math.random() * 200);
+
+        case "power":
+            return +(20 + Math.random() * 200).toFixed(1);
+
+        case "voltage":
+            return +(200 + Math.random() * 50).toFixed(1);
+
+        case "current":
+            return +(5 + Math.random() * 20).toFixed(2);
+
+        case "cumulative":
+            return +(1000 + Math.random() * 500).toFixed(1);
+
+        case "radiation":
+            return +(Math.random() * 0.2).toFixed(3);
+
+        case "flow":
+            return +(1 + Math.random() * 10).toFixed(2);
+
+        case "cycles_per_hour":
+            return Math.floor(Math.random() * 10);
+
+        case "state":
+            return Math.random() > 0.5 ? "Open" : "Closed";
+
+        default:
+            if (category === "actuator") {
+                return Math.random() > 0.5;
+            }
+            return 0;
     }
 };
 
 // invia messaggi casuali ogni 1-2 secondi
 const sendRandomUpdate = (ws) => {
+
     const categories = ["sensor", "topic", "actuator"];
     const category = categories[Math.floor(Math.random() * categories.length)];
 
+    let source;
     let key;
+
     if (category === "sensor") {
         const keys = Object.keys(SENSORS);
         key = keys[Math.floor(Math.random() * keys.length)];
+        source = SENSORS[key];
     } else if (category === "topic") {
         const keys = Object.keys(TOPICS);
         key = keys[Math.floor(Math.random() * keys.length)];
+        source = TOPICS[key];
     } else {
         const keys = Object.keys(ACTUATORS);
         key = keys[Math.floor(Math.random() * keys.length)];
+        source = ACTUATORS[key];
+    }
+
+    let metric = null;
+    let unit = null;
+    let value = null;
+
+    if (category !== "actuator") {
+
+        const index = Math.floor(Math.random() * source.metric.length);
+
+        metric = source.metric[index];
+        unit = source.unit[index];
+
+        value = getRandomValue(metric, category);
+
+    } else {
+
+        value = getRandomValue(null, "actuator");
+
     }
 
     const message = JSON.stringify({
         category,
         key,
-        value: getRandomValue(key, category),
+        metric,
+        unit,
+        value,
+        status: getRandomStatus(source.status),
         timestamp: Date.now()
     });
 
     ws.send(message);
 
-    // prossimo update casuale
     setTimeout(() => sendRandomUpdate(ws), 1000 + Math.random() * 1000);
 };
 

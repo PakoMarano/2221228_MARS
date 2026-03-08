@@ -12,18 +12,13 @@ import {
     Tooltip,
     ResponsiveContainer
 } from "recharts";
+import { processDataForChart } from "../../utils/chart-utils";
 
 const Chart = ({ data, type = "line", title = "", unit = "", height = 300 }) => {
     const titleRef = useRef(null);
     const [chartHeight, setChartHeight] = useState(height);
 
-    const formattedData =
-        data && data.length > 0
-            ? data.map(d => ({
-                ...d,
-                time: new Date(d.timestamp).toLocaleTimeString()
-            }))
-            : [{ time: "N/A", value: 0 }];
+    const formattedData = processDataForChart(data);
 
     useEffect(() => {
         if (titleRef.current) {
@@ -34,43 +29,63 @@ const Chart = ({ data, type = "line", title = "", unit = "", height = 300 }) => 
     const axisStyle = { fill: "#e5e5e5", fontSize: 12 };
 
     const renderChart = () => {
+        const commonProps = { data: formattedData, margin: { top: 5, right: 20, bottom: 5, left: 0 } };
+
+        const LineOrAreaProps = { type: "monotone", dataKey: "numericValue", stroke: "#ff6b35", dot: { r: 3 } };
+        const AreaProps = { ...LineOrAreaProps, fill: "#ff6b3522", dot: false };
+        const BarProps = { dataKey: "numericValue", fill: "#ff6b35" };
+
+        const CustomTooltip = ({ active, payload, label }) => {
+            if (active && payload && payload.length) {
+                return (
+                    <div style={{ backgroundColor: "#2a2d37", padding: "8px", color: "#fff", borderRadius: 4 }}>
+                        <div>{label}</div>
+                        <div>Value: {payload[0].payload.originalValue}</div>
+                    </div>
+                );
+            }
+            return null;
+        };
+
         switch (type) {
             case "bar":
                 return (
-                    <BarChart data={formattedData}>
+                    <BarChart {...commonProps}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#595a5e" />
                         <XAxis dataKey="time" tick={axisStyle} />
                         <YAxis unit={unit} tick={axisStyle} />
-                        <Tooltip contentStyle={{ backgroundColor: "#2a2d37", border: "none", color: "#fff" }} />
-                        <Bar dataKey="value" fill="#ff6b35" />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar {...BarProps} />
                     </BarChart>
                 );
             case "area":
                 return (
-                    <AreaChart data={formattedData}>
+                    <AreaChart {...commonProps}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#595a5e" />
                         <XAxis dataKey="time" tick={axisStyle} />
                         <YAxis unit={unit} tick={axisStyle} />
-                        <Tooltip contentStyle={{ backgroundColor: "#2a2d37", border: "none", color: "#fff" }} />
-                        <Area type="monotone" dataKey="value" stroke="#ff6b35" fill="#ff6b3522" />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Area {...AreaProps} />
                     </AreaChart>
                 );
             case "line":
             default:
                 return (
-                    <LineChart data={formattedData}>
+                    <LineChart {...commonProps}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#595a5e" />
                         <XAxis dataKey="time" tick={axisStyle} />
                         <YAxis unit={unit} tick={axisStyle} />
-                        <Tooltip contentStyle={{ backgroundColor: "#2a2d37", border: "none", color: "#fff" }} />
-                        <Line type="monotone" dataKey="value" stroke="#ff6b35" />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Line {...LineOrAreaProps} />
                     </LineChart>
                 );
         }
     };
 
     return (
-        <div style={{ width: "100%", height, padding: "8px 0" }}>
+        <div
+            style={{ width: "100%", height, padding: "8px 0" }}
+        >
             {title && (
                 <h4 ref={titleRef} style={{ margin: "0 0 16px 8px", color: "#e5e5e5" }}>
                     {title}

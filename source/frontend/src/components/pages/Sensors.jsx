@@ -12,6 +12,7 @@ const Sensors = () => {
 
     const [activeAreas, setActiveAreas] = useState([...AREAS]);
     const [activeTypes, setActiveTypes] = useState([...TYPES]);
+    const [metricIndex, setMetricIndex] = useState({});
 
     const toggleFilter = (filterArray, setFilterArray, value) => {
         if (filterArray.includes(value)) {
@@ -26,6 +27,14 @@ const Sensors = () => {
         const sensorTypes = sensor.tags.filter(tag => TYPES.includes(tag));
         return sensorAreas.some(a => activeAreas.includes(a)) && sensorTypes.some(t => activeTypes.includes(t));
     });
+
+    const handleMetricClick = (key, metrics) => {
+        if (metrics.length <= 1) return;
+        setMetricIndex(prev => ({
+            ...prev,
+            [key]: ((prev[key] ?? 0) + 1) % metrics.length
+        }));
+    };
 
     return (
         <div className="page sensors-page">
@@ -58,18 +67,38 @@ const Sensors = () => {
             </div>
 
             <div className="card-grid cols-3">
-                {filteredSensors.map(sensor => (
-                    <div key={sensor.key} className="sensors-card">
-                        <Chart
-                            data={sensorsState.values[sensor.key]}
-                            type={sensor.chartType}
-                            unit={sensor.unit}
-                            title={sensor.label}
-                            width="100%"
-                            height={200}
-                        />
-                    </div>
-                ))}
+                {filteredSensors.map(sensor => {
+                    const metrics = Object.keys(sensorsState.values[sensor.key] ?? {});
+                    const currentIndex = metricIndex[sensor.key] ?? 0;
+                    const currentMetric = metrics[currentIndex];
+
+                    const data = currentMetric
+                        ? sensorsState.values[sensor.key][currentMetric]
+                        : [];
+
+                    return (
+                        <div
+                            key={sensor.key}
+                            className="sensors-card"
+                            style={{ cursor: metrics.length > 1 ? "pointer" : "default" }}
+                            onClick={() => handleMetricClick(sensor.key, metrics)}
+                        >
+                            <Chart
+                                data={data}
+                                type={sensor.defaultChartType}
+                                unit={data?.[0]?.unit ?? ""}
+                                title={`${sensor.label}${metrics.length > 1 ? ` (${currentMetric})` : ""}`}
+                                width="100%"
+                                height={200}
+                            />
+                            {metrics.length > 1 && (
+                                <div className="metric-hint">
+                                    Click to switch metric
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

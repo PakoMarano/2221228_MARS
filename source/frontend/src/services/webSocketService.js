@@ -18,21 +18,41 @@ export const useWebSocketService = () => {
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                const { category, key, value } = data;
+
+                const { category, key, metric, value, unit, status, timestamp } = data;
 
                 switch (category) {
+
                     case "sensor":
-                        dispatch(addSensorValue(key, value));
+                        dispatch(addSensorValue({
+                            key,
+                            metric,
+                            value,
+                            unit,
+                            status,
+                            timestamp
+                        }));
                         break;
+
                     case "topic":
-                        dispatch(addTopicValue(key, value));
+                        dispatch(addTopicValue({
+                            key,
+                            metric,
+                            value,
+                            unit,
+                            status,
+                            timestamp
+                        }));
                         break;
+
                     case "actuator":
                         dispatch(setActuator(key, value));
                         break;
+
                     default:
                         break;
                 }
+
             } catch (err) {
                 console.error("Invalid WS message:", event.data);
             }

@@ -2,50 +2,43 @@ export const TOPICS = {
     solar_array: {
         key: "solar_array",
         label: "Solar Array",
-        unit: "kW",
-        chartType: "area",
+        defaultChartType: "area",
         tags: ["power", "low"]
     },
     radiation: {
         key: "radiation",
         label: "Radiation",
-        unit: "mSv/h",
-        chartType: "line",
+        defaultChartType: "line",
         tags: ["environment", "medium"]
     },
     life_support: {
         key: "life_support",
         label: "Life Support",
-        unit: null,
-        chartType: "line",
+        defaultChartType: "line",
         tags: ["environment", "high"]
     },
     thermal_loop: {
         key: "thermal_loop",
         label: "Thermal Loop",
-        unit: "°C",
-        chartType: "area",
+        defaultChartType: "area",
         tags: ["thermal", "medium"]
     },
     power_bus: {
         key: "power_bus",
         label: "Power Bus",
-        unit: "V",
-        chartType: "bar",
+        defaultChartType: "bar",
         tags: ["power", "medium"]
     },
     power_consumption: {
         key: "power_consumption",
         label: "Power Consumption",
-        unit: "kW",
-        chartType: "bar",
+        defaultChartType: "bar",
         tags: ["power", "low"]
     },
     airlock: {
         key: "airlock",
         label: "Airlock",
-        unit: null,
-        chartType: "line",
+        defaultChartType: "line",
         tags: ["airlock", "high"]
     }
 };

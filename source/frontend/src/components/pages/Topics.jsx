@@ -12,6 +12,7 @@ const Topics = () => {
 
     const [activeTypes, setActiveTypes] = useState([...TYPES]);
     const [activeCriticalities, setActiveCriticalities] = useState([...CRITICALITIES]);
+    const [metricIndex, setMetricIndex] = useState({});
 
     const toggleFilter = (filterArray, setFilterArray, value) => {
         if (filterArray.includes(value)) {
@@ -26,6 +27,14 @@ const Topics = () => {
         const topicCriticality = topic.tags[1];
         return activeTypes.includes(topicType) && activeCriticalities.includes(topicCriticality);
     });
+
+    const handleMetricClick = (key, metrics) => {
+        if (!metrics || metrics.length <= 1) return;
+        setMetricIndex(prev => ({
+            ...prev,
+            [key]: ((prev[key] ?? 0) + 1) % metrics.length
+        }));
+    };
 
     return (
         <div className="page topics-page">
@@ -58,18 +67,39 @@ const Topics = () => {
             </div>
 
             <div className="card-grid cols-3">
-                {filteredTopics.map(topic => (
-                    <div key={topic.key} className="sensors-card">
-                        <Chart
-                            data={topicsState.values[topic.key]}
-                            type={topic.chartType}
-                            unit={topic.unit || ""}
-                            title={topic.label}
-                            width="100%"
-                            height={200}
-                        />
-                    </div>
-                ))}
+                {filteredTopics.map(topic => {
+                    const metrics = Object.keys(topicsState.values[topic.key] ?? {});
+                    const hasMultipleMetrics = metrics.length > 1;
+                    const currentIndex = metricIndex[topic.key] ?? 0;
+                    const currentMetric = metrics[currentIndex];
+
+                    const dataToDisplay = currentMetric
+                        ? topicsState.values[topic.key][currentMetric]
+                        : [];
+
+                    return (
+                        <div
+                            key={topic.key}
+                            className="sensors-card"
+                            style={{ cursor: hasMultipleMetrics ? "pointer" : "default" }}
+                            onClick={hasMultipleMetrics ? () => handleMetricClick(topic.key, metrics) : undefined}
+                        >
+                            <Chart
+                                data={dataToDisplay}
+                                type={topic.chartType}
+                                unit={topic.unit || ""}
+                                title={`${topic.label}${hasMultipleMetrics ? ` (${currentMetric})` : ""}`}
+                                width="100%"
+                                height={200}
+                            />
+                            {hasMultipleMetrics && (
+                                <div className="metric-hint">
+                                    Click to switch metric
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

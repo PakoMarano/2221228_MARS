@@ -138,6 +138,23 @@
   gap: var(--gap-menu);
 }
 
+.metric-switch-icon {
+  transition: transform 0.2s;
+}
+
+.card-item:active .metric-switch-icon {
+  transform: rotate(180deg);
+}
+
+.card-item-warning {
+  border: 1px solid #f2c94c;
+  background-color: rgb(201, 180, 76) !important;
+}
+
+.card-item-warning * {
+  color: black !important;
+}
+
 .sensors-page,
 .topics-page,
 .actuators-page {
@@ -249,6 +266,11 @@
   color: var(--color-text-card-item-value);
 }
 
+.card-item-time.actuator {
+  align-items: center;
+  margin-left: 2rem;
+}
+
 .card-item-value {
   display: flex;
   height: 100%;
@@ -335,6 +357,13 @@
   padding: 8px;
   display: flex;
   flex-direction: column;
+}
+
+.recharts-responsive-container:focus,
+.recharts-responsive-container *:focus,
+.recharts-responsive-container:focus-visible,
+.recharts-responsive-container *:focus-visible {
+  outline: none !important;
 }
 
 /* Container dei filtri */

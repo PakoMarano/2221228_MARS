@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Card from "../ui/Card";
 import { TOPICS } from "../../constants/enums/topics";
 import { useStore } from "../../store/store";
@@ -7,6 +7,17 @@ import { getLastTopicValue } from "../../store/slices/topicsSlice";
 const TopicsCard = ({ onViewAll }) => {
     const { state } = useStore();
     const topicsState = state.topics;
+
+    const [metricIndex, setMetricIndex] = useState({});
+
+    const handleMetricChange = (key, metrics) => {
+        if (metrics.length <= 1) return;
+
+        setMetricIndex((prev) => ({
+            ...prev,
+            [key]: ((prev[key] ?? 0) + 1) % metrics.length
+        }));
+    };
 
     return (
         <Card
@@ -23,30 +34,56 @@ const TopicsCard = ({ onViewAll }) => {
         >
             <div className="card-grid cols-2">
                 {Object.values(TOPICS).map((topic) => {
-                    const lastValue = getLastTopicValue(topicsState, topic.key);
-                    const displayValue = lastValue?.value ?? "-";
-                    const timestamp = lastValue?.timestamp;
+                    const metrics = Object.keys(topicsState.values[topic.key] ?? {});
+                    const currentIndex = metricIndex[topic.key] ?? 0;
+                    const currentMetric = metrics[currentIndex];
 
-                    const isValidDate = timestamp && !isNaN(new Date(timestamp).getTime());
-                    const displayTime = isValidDate ? new Date(timestamp).toLocaleTimeString() : null;
+                    const lastValue = currentMetric
+                        ? getLastTopicValue(topicsState, topic.key, currentMetric)
+                        : null;
+
+                    const displayValue = lastValue?.value ?? "-";
+                    const unit = lastValue?.unit ?? topic.unit ?? "";
+                    const timestamp = lastValue?.timestamp;
+                    const status = lastValue?.status;
+
+                    const isValidDate =
+                        timestamp && !isNaN(new Date(timestamp).getTime());
+                    const displayTime = isValidDate
+                        ? new Date(timestamp).toLocaleTimeString()
+                        : null;
 
                     return (
-                        <div key={topic.key} className="card-item">
+                        <div
+                            key={topic.key}
+                            className={`card-item ${status === "WARNING" ? "card-item-warning" : ""}`}
+                            onClick={() => handleMetricChange(topic.key, metrics)}
+                            style={{ cursor: metrics.length > 1 ? "pointer" : "default" }}
+                        >
                             <span className="card-item-label card-item-label-margin">
                                 {topic.label}
+                                {metrics.length > 1 && (
+                                    <i
+                                        className="bi bi-arrow-repeat ms-2 metric-switch-icon"
+                                        title="Click to change metric"
+                                    ></i>
+                                )}
                             </span>
 
                             <div
                                 className="w-100 d-flex align-items-center"
-                                style={{ justifyContent: displayTime ? "space-between" : "flex-end" }}
+                                style={{
+                                    justifyContent: displayTime ? "space-between" : "flex-end"
+                                }}
                             >
                                 {displayTime && (
                                     <span className="card-item-time">
                                         Last updated {displayTime}
                                     </span>
                                 )}
+
                                 <span className="card-item-value card-item-value-end">
-                                    {displayValue} {topic.unit || ""}
+                                    {displayValue} {unit}
                                 </span>
                             </div>
                         </div>

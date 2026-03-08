@@ -29,24 +29,38 @@ const ActuatorsCard = ({ onConfigure }) => {
             }
         >
             <div className="card-grid cols-2">
-                {Object.values(ACTUATORS).map((actuator) => (
-                    <div key={actuator.key} className="card-item actuator">
-                        <span className="card-item-label">
-                            {actuator.label}
-                        </span>
+                {Object.values(ACTUATORS).map((actuator) => {
+                    const lastUpdated = actuatorsState.lastUpdated?.[actuator.key];
+                    const displayTime =
+                        lastUpdated && !isNaN(new Date(lastUpdated).getTime())
+                            ? new Date(lastUpdated).toLocaleTimeString()
+                            : null;
 
-                        <span className="card-item-value card-item-value-center">
-                            <label className="switch">
-                                <input
-                                    type="checkbox"
-                                    checked={actuatorsState.values[actuator.key] || false}
-                                    onChange={() => handleToggle(actuator.key)}
-                                />
-                                <span className="switch-slider"></span>
-                            </label>
-                        </span>
-                    </div>
-                ))}
+                    return (
+
+                        <div key={actuator.key} className="card-item actuator">
+                            <span className="card-item-label">
+                                {actuator.label}
+                                {displayTime && (
+                                    <span className="card-item-time actuator">
+                                        Last updated {displayTime}
+                                    </span>
+                                )}
+                            </span>
+
+                            <span className="card-item-value card-item-value-center">
+                                <label className="switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={actuatorsState.values[actuator.key] || false}
+                                        onChange={() => handleToggle(actuator.key)}
+                                    />
+                                    <span className="switch-slider"></span>
+                                </label>
+                            </span>
+                        </div>
+                    );
+                })}
             </div>
         </Card>
     );
