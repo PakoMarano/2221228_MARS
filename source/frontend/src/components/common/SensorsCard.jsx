@@ -24,7 +24,11 @@ const SensorsCard = ({ onViewAll }) => {
             <div className="card-grid cols-2">
                 {Object.values(SENSORS).map((sensor) => {
                     const lastValue = getLastSensorValue(sensorsState, sensor.key);
-                    const displayValue = lastValue !== null ? lastValue.value : "-";
+                    const displayValue = lastValue?.value ?? "-";
+                    const timestamp = lastValue?.timestamp;
+
+                    const isValidDate = timestamp && !isNaN(new Date(timestamp).getTime());
+                    const displayTime = isValidDate ? new Date(timestamp).toLocaleTimeString() : null;
 
                     return (
                         <div key={sensor.key} className="card-item">
@@ -32,9 +36,19 @@ const SensorsCard = ({ onViewAll }) => {
                                 {sensor.label}
                             </span>
 
-                            <span className="card-item-value card-item-value-end">
-                                {displayValue} {sensor.unit}
-                            </span>
+                            <div
+                                className="w-100 d-flex align-items-center"
+                                style={{ justifyContent: displayTime ? "space-between" : "flex-end" }}
+                            >
+                                {displayTime && (
+                                    <span className="card-item-time">
+                                        Last updated {displayTime}
+                                    </span>
+                                )}
+                                <span className="card-item-value card-item-value-end">
+                                    {displayValue} {sensor.unit}
+                                </span>
+                            </div>
                         </div>
                     );
                 })}

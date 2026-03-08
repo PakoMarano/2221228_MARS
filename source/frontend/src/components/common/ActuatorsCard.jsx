@@ -30,7 +30,7 @@ const ActuatorsCard = ({ onConfigure }) => {
         >
             <div className="card-grid cols-2">
                 {Object.values(ACTUATORS).map((actuator) => (
-                    <div key={actuator.key} className="card-item">
+                    <div key={actuator.key} className="card-item actuator">
                         <span className="card-item-label">
                             {actuator.label}
                         </span>

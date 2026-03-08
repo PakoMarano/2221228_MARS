@@ -24,7 +24,11 @@ const TopicsCard = ({ onViewAll }) => {
             <div className="card-grid cols-2">
                 {Object.values(TOPICS).map((topic) => {
                     const lastValue = getLastTopicValue(topicsState, topic.key);
-                    const displayValue = lastValue !== null ? lastValue.value : "-";
+                    const displayValue = lastValue?.value ?? "-";
+                    const timestamp = lastValue?.timestamp;
+
+                    const isValidDate = timestamp && !isNaN(new Date(timestamp).getTime());
+                    const displayTime = isValidDate ? new Date(timestamp).toLocaleTimeString() : null;
 
                     return (
                         <div key={topic.key} className="card-item">
@@ -32,9 +36,19 @@ const TopicsCard = ({ onViewAll }) => {
                                 {topic.label}
                             </span>
 
-                            <span className="card-item-value card-item-value-end">
-                                {displayValue} {topic.unit || ""}
-                            </span>
+                            <div
+                                className="w-100 d-flex align-items-center"
+                                style={{ justifyContent: displayTime ? "space-between" : "flex-end" }}
+                            >
+                                {displayTime && (
+                                    <span className="card-item-time">
+                                        Last updated {displayTime}
+                                    </span>
+                                )}
+                                <span className="card-item-value card-item-value-end">
+                                    {displayValue} {topic.unit || ""}
+                                </span>
+                            </div>
                         </div>
                     );
                 })}
