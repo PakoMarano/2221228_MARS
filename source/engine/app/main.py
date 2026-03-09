@@ -152,16 +152,25 @@ async def manual_actuator_override(actuator_name: str, command: ActuatorCommand)
             raise HTTPException(status_code=e.response.status_code, detail="Simulator rejected the command")
 
 
-@app.get("/api/actuators/")
+@app.get("/api/actuators")
 async def get_actuators():
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(
-                f"{SIMULATOR_URL}/api/actuators/",
+                f"{SIMULATOR_URL}/api/actuators",
                 timeout=3.0
             )
             response.raise_for_status()
-            return response.json()
+
+            data = response.json()
+
+            actuators = data.get("actuators", {})
+            normalized_actuators = {
+                name: True if state.upper() == "ON" else False if state.upper() == "OFF" else state
+                for name, state in actuators.items()
+            }
+            
+            return normalized_actuators
 
         except httpx.RequestError:
             raise HTTPException(status_code=503, detail="Simulator is unreachable")

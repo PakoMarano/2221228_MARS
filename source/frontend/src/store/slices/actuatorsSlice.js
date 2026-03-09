@@ -72,11 +72,10 @@ export const actuatorsReducer = (state, action) => {
             const newValues = { ...state.values };
             const newLastUpdated = { ...state.lastUpdated };
 
-            Object.entries(action.payload).forEach(([key, item]) => {
-                // item = { value, timestamp }
+            Object.entries(action.payload).forEach(([key, value]) => {
                 if (newValues.hasOwnProperty(key)) {
-                    newValues[key] = !!item.value;
-                    newLastUpdated[key] = item.timestamp ?? newLastUpdated[key];
+                    newValues[key] = !!value;
+                    newLastUpdated[key] = Date.now();
                 }
             });
 

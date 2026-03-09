@@ -9,7 +9,7 @@ export const createRule = (rule) => {
 };
 
 export const updateRule = (id, rule) => {
-    return api.put(`/rules/${id}`, rule);
+    return api.patch(`/rules/${id}`, rule);
 };
 
 export const deleteRule = (id) => {
@@ -17,5 +17,5 @@ export const deleteRule = (id) => {
 };
 
 export const updateRuleStatusApi = (id, status) => {
-    return api.put(`/rules/${id}/status`, { status });
+    return api.patch(`/rules/${id}/status`, { status });
 };

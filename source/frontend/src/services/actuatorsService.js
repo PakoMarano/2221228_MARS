@@ -4,6 +4,6 @@ export const getActuatorsState = () => {
     return api.get("/actuators");
 };
 
-export const setActuatorState = (key, value) => {
-    return api.post("/actuators", { key, value });
+export const setActuatorState = (actuator_name, value) => {
+    return api.post(`/actuators/${actuator_name}`, { state: value });
 };

@@ -12,7 +12,7 @@ const Dashboard = ({ goTo }) => {
     const { fetchRules } = useRules();
 
     useEffect(() => {
-        //fetchActuators();
+        fetchActuators();
         fetchRules();
     }, []);
 
