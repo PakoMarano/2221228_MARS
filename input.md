@@ -58,6 +58,8 @@ Martian Survival Kit is a distributed automation platform capable of ingesting h
 	Comparison operator used to evaluate the rule (example: `>`, `<`, `==`).
 - `threshold_value: string`
 	Value to compare against. Stored as string to support both numeric and symbolic sensor values.
+- `unit: string`
+	Unit associated with the selected sensor/topic metric for threshold comparison (example: `C`, `%`, `ppm`).
 - `actuator_target: string`
 	Target actuator name to control when the rule condition is true.
 - `actuator_state: string`

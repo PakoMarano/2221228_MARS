@@ -43,9 +43,9 @@ async def create_rule(rule: RuleCreate):
     cursor = conn.cursor()
     
     cursor.execute('''
-        INSERT INTO rules (sensor_id, operator, threshold_value, actuator_target, actuator_state, active)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (rule.sensor_id, rule.operator, rule.threshold_value, rule.actuator_target, rule.actuator_state, int(rule.active)))
+        INSERT INTO rules (sensor_id, operator, threshold_value, unit, actuator_target, actuator_state, active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (rule.sensor_id, rule.operator, rule.threshold_value, rule.unit, rule.actuator_target, rule.actuator_state, int(rule.active)))
     
     rule_id = cursor.lastrowid
     conn.commit()

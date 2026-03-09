@@ -11,6 +11,7 @@ class RuleCreate(BaseModel):
     operator: str
     # Stored as TEXT because some sensors (e.g. airlock) send string values like "IDLE" instead of numbers
     threshold_value: str = Field(alias="threshold")
+    unit: str
     actuator_target: str = Field(alias="actuator")
     actuator_state: str = Field(alias="setTo")
     active: bool = Field(default=True, alias="status")
@@ -22,6 +23,7 @@ class RuleUpdate(BaseModel):
     sensor_id: Optional[str] = Field(default=None, alias="sensorId")
     operator: Optional[str] = None
     threshold_value: Optional[str] = Field(default=None, alias="threshold")
+    unit: Optional[str] = None
     actuator_target: Optional[str] = Field(default=None, alias="actuator")
     actuator_state: Optional[str] = Field(default=None, alias="setTo")
     active: Optional[bool] = Field(default=None, alias="status")

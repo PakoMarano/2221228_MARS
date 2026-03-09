@@ -22,6 +22,7 @@ def init_db():
             sensor_id TEXT NOT NULL,
             operator TEXT NOT NULL,
             threshold_value TEXT NOT NULL,
+            unit TEXT NOT NULL,
             actuator_target TEXT NOT NULL,
             actuator_state TEXT NOT NULL,
             active INTEGER NOT NULL DEFAULT 1
