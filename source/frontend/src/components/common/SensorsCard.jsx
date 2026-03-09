@@ -59,7 +59,7 @@ const SensorsCard = ({ onViewAll }) => {
                     return (
                         <div
                             key={sensor.key}
-                            className={`card-item ${status === "WARNING" ? "card-item-warning" : ""}`}
+                            className={`card-item ${status === "warning" ? "card-item-warning" : ""}`}
                             onClick={() => handleMetricChange(sensor.key, metrics)}
                             style={{ cursor: metrics.length > 1 ? "pointer" : "default" }}
                         >

@@ -59,7 +59,7 @@ const TopicsCard = ({ onViewAll }) => {
                     return (
                         <div
                             key={topic.key}
-                            className={`card-item ${status === "WARNING" ? "card-item-warning" : ""}`}
+                            className={`card-item ${status === "warning" ? "card-item-warning" : ""}`}
                             onClick={() => handleMetricChange(topic.key, metrics)}
                             style={{ cursor: metrics.length > 1 ? "pointer" : "default" }}
                         >

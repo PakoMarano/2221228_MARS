@@ -110,7 +110,7 @@ console.log(`Mock WebSocket server running on ws://localhost:${PORT}`);
 
 const getRandomStatus = (statusEnabled) => {
     if (!statusEnabled) return null;
-    return Math.random() > 0.8 ? "WARNING" : "OK";
+    return Math.random() > 0.8 ? "warning" : "ok";
 };
 
 const getRandomValue = (metric, category) => {
