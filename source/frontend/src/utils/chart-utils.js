@@ -1,21 +1,41 @@
 export const processDataForChart = (data) => {
-    if (!data || data.length === 0) return [{ time: "N/A", value: 0 }];
+    if (!data || data.length === 0)
+        return [{ time: "N/A", value: 0, numericValue: 0 }];
+
+    // Mappatura dei nuovi stati
+    const stateMap = {
+        DEPRESSURIZING: 0,
+        IDLE: 1,
+        PRESSURIZING: 2
+    };
 
     return data.map(d => {
         let numericValue = d.value;
 
-        // Se è una stringa booleano tipo Open/Closed -> mappiamo a 1/0
         if (typeof d.value === "string") {
-            if (d.value.toLowerCase() === "open") numericValue = 1;
-            else if (d.value.toLowerCase() === "closed") numericValue = 0;
-            else numericValue = 0; // default fallback
+            const valUpper = d.value.toUpperCase();
+
+            // Gestione nuovi stati categorici
+            if (stateMap.hasOwnProperty(valUpper)) {
+                numericValue = stateMap[valUpper];
+            }
+            // Gestione booleani Open/Closed
+            else if (valUpper === "OPEN") {
+                numericValue = 1;
+            } else if (valUpper === "CLOSED") {
+                numericValue = 0;
+            }
+            // Fallback per altri casi stringa
+            else {
+                numericValue = 0;
+            }
         }
 
         return {
             ...d,
             time: new Date(d.timestamp).toLocaleTimeString(),
             numericValue,
-            originalValue: d.value,
+            originalValue: d.value
         };
     });
 };
