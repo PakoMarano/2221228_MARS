@@ -30,3 +30,20 @@ Martian Survival Kit is a distributed automation platform capable of ingesting h
 17. As a user, I want to see which rules were triggered recently, so that I can verify that the automation engine is working correctly.
 
 18. As a user, I want real-time updates of rule-triggered events via WebSocket or SSE, so that my dashboard reflects actions immediately.
+
+
+# RULE MODEL:
+- `sensor_id: string`
+	Sensor identifier used in the condition (example: `temp_1`).
+- `operator: string`
+	Comparison operator used to evaluate the rule (example: `>`, `<`, `==`).
+- `threshold_value: string`
+	Value to compare against. Stored as string to support both numeric and symbolic sensor values.
+- `actuator_target: string`
+	Target actuator name to control when the rule condition is true.
+- `actuator_state: string`
+	State/command sent to the actuator when triggered (`ON`, `OFF`).
+- `active: boolean` (default: `true`)
+	Enables or disables rule execution without deleting the rule.
+- `id: integer` (response only)
+	Unique identifier assigned by the backend when a rule is created.

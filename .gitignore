@@ -1,0 +1,11 @@
+mars-iot-simulator-oci.tar
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.env
+
+# DB files
+*.db
+*.sqlite3
