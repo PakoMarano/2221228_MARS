@@ -49,7 +49,7 @@ async def consume_and_broadcast():
                 }
             
             if formatted_msg:
-                print(f"📢 Broadcasting a {len(manager.active_connections)} client connessi: {formatted_msg}")
+                #print(f"📢 Broadcasting a {len(manager.active_connections)} client connessi: {formatted_msg}")
                 await manager.broadcast(formatted_msg)
                 
     except asyncio.CancelledError:

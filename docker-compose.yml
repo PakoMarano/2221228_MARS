@@ -148,6 +148,9 @@ services:
       WS_PROTOCOL: "ws"
       WS_HOST: "localhost"
       WS_PORT: "4000"
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
 
 volumes:
       engine-db-volume:
