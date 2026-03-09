@@ -1,6 +1,7 @@
 # SYSTEM DESCRIPTION:
 Martian Survival Kit is a distributed automation platform capable of ingesting heterogeneous sensor data, normalizing it into a unified internal representation, evaluating simple automation rules, and providing a real-time dashboard for habitat monitoring.
 
+
 # USER STORIES:
 1. As a user, I want a dashboard that updates sensor values in real time, so that I can continuously monitor habitat conditions.
 
@@ -31,9 +32,23 @@ Martian Survival Kit is a distributed automation platform capable of ingesting h
 14. As a user, I want to modify existing automation rules so that I can temporarily disable them when needed.
 
 15. As a user, I want to see the last time each automation rule was triggered, so that I can verify the automation engine is working correctly.
-17. As a user, I want to see which rules were triggered recently, so that I can verify that the automation engine is working correctly.
 
-18. As a user, I want real-time updates of rule-triggered events via WebSocket or SSE, so that my dashboard reflects actions immediately.
+
+# STANDARD EVENT SCHEMA:
+- `device_id: string`
+	Unique identifier of the source device (example: `greenhouse_temperature`).
+- `device_type: string`
+	Type of device producing the event (example: `sensor`, `actuator`).
+- `timestamp: string`
+	UTC event time (example: `2026-03-06T12:00:00Z`).
+- `status: string`
+	Ingestion/health status for the event (example: `ok`, `warning`).
+- `metric: string`
+	Measurement name reported by the device (example: `temperature`, `humidity`).
+- `value: string`
+	Normalized value payload; supports both numeric readings and symbolic states.
+- `unit: string`
+	Unit for numeric metrics when applicable (example: `C`, `%`, `ppm`).
 
 
 # RULE MODEL:
