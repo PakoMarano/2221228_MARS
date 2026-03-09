@@ -6,7 +6,7 @@ from app.kafka_client import kafka_client, TOPIC_TELEMETRY
 
 # Read the simulator URL from environment variables, fallback to localhost for local testing
 SIMULATOR_URL = os.getenv("SIMULATOR_URL", "http://localhost:8080")
-POLL_INTERVAL_SECONDS = 30
+POLL_INTERVAL_SECONDS = 5
 
 async def fetch_sensor_data(session: aiohttp.ClientSession, sensor_id: str):
     """Makes a GET request to a specific sensor endpoint to get its current state."""
