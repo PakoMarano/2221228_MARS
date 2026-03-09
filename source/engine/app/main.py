@@ -150,6 +150,21 @@ async def manual_actuator_override(actuator_name: str, command: ActuatorCommand)
         except httpx.HTTPStatusError as e:
             # Forward 400/404/500 errors from the simulator back to the frontend
             raise HTTPException(status_code=e.response.status_code, detail="Simulator rejected the command")
+
+
+@app.get("/api/actuators/")
+async def get_actuators():
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(
+                f"{SIMULATOR_URL}/api/actuators/",
+                timeout=3.0
+            )
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.RequestError:
+            raise HTTPException(status_code=503, detail="Simulator is unreachable")
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=e.response.status_code, detail="Unable to fetch actuators from simulator")
         
-# WHY NO GET ENDPOINT?
-# The physical simulator is write-only and lacks actuators state feedback.
