@@ -22,8 +22,8 @@ async def consume_and_broadcast():
             # Translates backend events into the schema required by the frontend
             if topic == "actuator-events":
                 formatted_msg = {
-                    "category": "actuator",
-                    "key": payload.get("actuator", "unknown"),
+                    "device_type": "actuator",
+                    "device_id": payload.get("actuator", "unknown"),
                     "metric": str(payload.get("rule_id", "")), # Frontend uses 'metric' to display the Rule ID
                     "unit": "state",
                     "value": 1 if payload.get("state") == "ON" else 0, # Frontend JSON schema enforces 'value' as a number
@@ -37,10 +37,16 @@ async def consume_and_broadcast():
                     final_value = float(raw_value)
                 except (ValueError, TypeError):
                     final_value = raw_value
+
+                device_type_raw = payload.get("device_type")
+                if device_type_raw == "telemetry_stream":
+                    device_type = "topic"
+                else:
+                    device_type = "sensor"
                 
                 formatted_msg = {
-                    "category": "sensor",
-                    "key": payload.get("device_id", payload.get("key", "unknown")),
+                    "device_type": device_type,
+                    "device_id": payload.get("device_id", payload.get("key", "unknown")),
                     "metric": payload.get("metric", "level"),
                     "unit": payload.get("unit", ""),
                     "value": final_value,
