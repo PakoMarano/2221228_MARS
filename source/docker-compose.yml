@@ -50,6 +50,7 @@ services:
       echo '✅ Kafka is ready! Crating the topic...';
       
       /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic internal-telemetry;
+      /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic actuator-events;
         
       echo '🎉 Topic created successfully !';
       "
@@ -57,7 +58,7 @@ services:
   # 3. INGESTION SERVICE
   ingestion:
     build: 
-      context: ./source/ingestion-service
+      context: ./ingestion-service
       dockerfile: Dockerfile
     container_name: ingestion-service
     ports:
@@ -72,3 +73,84 @@ services:
       kafka-init:
         # FastAPI aspetterà che il topic sia creato prima di avviarsi!
         condition: service_completed_successfully
+  
+  # 4. AUTOMATION ENGINE (API)
+  automation-engine-api:
+    build: 
+      context: ./engine
+      dockerfile: Dockerfile
+    container_name: automation-engine-api
+    ports:
+      # Expose on 8001 so it doesn't clash with the ingestion service
+      - "8001:8000"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SIMULATOR_URL=http://simulator:8080
+    volumes:
+      # Share the app directory so both containers see the same SQLite rules.db
+      - engine-db-volume:/code/app/
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+  # 5. AUTOMATION ENGINE (WORKER)
+  automation-engine-worker:
+    build: 
+      context: ./engine
+      dockerfile: Dockerfile
+    container_name: automation-engine-worker
+    # Override the default command to start the background loop instead of FastAPI
+    command: ["python", "-m", "app.worker"]
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SIMULATOR_URL=http://simulator:8080
+    volumes:
+      - engine-db-volume:/code/app/
+    depends_on:
+      automation-engine-api:
+        # Wait for the API to run its lifespan and initialize the DB schema first
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+ 
+  # 6. PRESENTATION SERVICE
+  presentation-service:
+    build: 
+      context: ./presentation-service
+      dockerfile: Dockerfile
+    container_name: presentation-service
+    ports:
+      # Frontend connects to ws://localhost:4000
+      - "4000:4000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPICS=internal-telemetry,actuator-events
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      USE_DOCKER: "true"
+      REST_PROTOCOL: "http"
+      REST_HOST: "automation-engine-api"
+      REST_PORT: "8000"
+      WS_PROTOCOL: "ws"
+      WS_HOST: "localhost"
+      WS_PORT: "4000"
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+volumes:
+      engine-db-volume:
