@@ -112,123 +112,6 @@ services:
         condition: service_started
       kafka-init:
         condition: service_completed_successfully
-
-volumes:
-  engine-db-volume:
-
-services:
-  # 1. IOT SIMULATOR
-  simulator:
-    image: mars-iot-simulator:multiarch_v1
-    container_name: iot-simulator
-    ports:
-      - "8080:8080"
-    # Remember to do: 'docker load -i mars-iot-simulator-oci.tar' before up
-
-  # 2. KAFKA (Modalità KRaft, single node, no Zookeeper)
-  kafka:
-    image: apache/kafka:latest
-    container_name: kafka-broker
-    ports:
-      # Expose both internal (9092) and external (29092) ports
-      - "9092:9092"
-      - "29092:29092"
-    environment:
-      - KAFKA_NODE_ID=1
-      - KAFKA_PROCESS_ROLES=broker,controller
-      # Define 3 listeners: INTERNAL (for Docker), EXTERNAL (for VS Code), CONTROLLER (for KRaft)
-      - KAFKA_LISTENERS=INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
-      # Tell clients which address to use depending on how they connected
-      - KAFKA_ADVERTISED_LISTENERS=INTERNAL://kafka:9092,EXTERNAL://localhost:29092
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
-      - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
-      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
-      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
-      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
-      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
-
-  # ---------------------------------------------------------
-  # Setup Container per pre-creare i topic di Kafka
-  # ---------------------------------------------------------
-  kafka-init:
-    image: apache/kafka:latest
-    container_name: kafka-init
-    depends_on:
-      - kafka
-    command: >
-      bash -c "
-      echo '⏳ Waiting for Kafka to be ready...';
-      while ! /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list > /dev/null 2>&1; do
-        sleep 2;
-      done;
-      
-      echo '✅ Kafka is ready! Crating the topic...';
-      
-      /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic internal-telemetry;
-      /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic actuator-events;
-        
-      echo '🎉 Topic created successfully !';
-      "
-
-  # 3. INGESTION SERVICE
-  ingestion:
-    build: 
-      context: ./source/ingestion-service
-      dockerfile: Dockerfile
-    container_name: ingestion-service
-    ports:
-      - "8000:8000"
-    environment:
-      - PYTHONUNBUFFERED=1
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SIMULATOR_URL=http://simulator:8080
-    depends_on:
-      simulator:
-        condition: service_started
-      kafka-init:
-        # FastAPI aspetterà che il topic sia creato prima di avviarsi!
-        condition: service_completed_successfully
-  
-  # 4. AUTOMATION ENGINE (API)
-  automation-engine-api:
-    build: 
-      context: ./source/engine
-      dockerfile: Dockerfile
-    container_name: automation-engine-api
-    ports:
-      # Expose on 8001 so it doesn't clash with the ingestion service
-      - "8001:8000"
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SIMULATOR_URL=http://simulator:8080
-    volumes:
-      # Share the app directory so both containers see the same SQLite rules.db
-      - engine-db-volume:/code/app/
-    depends_on:
-      kafka-init:
-        condition: service_completed_successfully
-
-  # 5. AUTOMATION ENGINE (WORKER)
-  automation-engine-worker:
-    build: 
-      context: ./source/engine
-      dockerfile: Dockerfile
-    container_name: automation-engine-worker
-    # Override the default command to start the background loop instead of FastAPI
-    command: ["python", "-m", "app.worker"]
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SIMULATOR_URL=http://simulator:8080
-    volumes:
-      - engine-db-volume:/code/app/
-    depends_on:
-      automation-engine-api:
-        # Wait for the API to run its lifespan and initialize the DB schema first
-        condition: service_started
-      kafka-init:
-        condition: service_completed_successfully
  
   # 6. PRESENTATION SERVICE
   presentation-service:
@@ -245,6 +128,25 @@ services:
     depends_on:
       kafka-init:
         condition: service_completed_successfully
+    
+
+  frontend:
+    build:
+      context: ./source/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./source/frontend:/app
+      - /app/node_modules
+    environment:
+      USE_DOCKER: "true"
+      REST_PROTOCOL: "http"
+      REST_HOST: "host.docker.internal"
+      REST_PORT: "8001"
+      WS_PROTOCOL: "ws"
+      WS_HOST: "host.docker.internal"
+      WS_PORT: "4000"
 
 volumes:
-  engine-db-volume:
+      engine-db-volume:
