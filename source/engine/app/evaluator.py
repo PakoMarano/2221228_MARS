@@ -15,8 +15,9 @@ def evaluate_rule(rule: dict, telemetry: dict) -> bool:
     Evaluates a single rule against a single telemetry event.
     Returns True if the actuator should be triggered, False otherwise.
     """
+    clean_device_id = telemetry["device_id"].removeprefix("mars/telemetry/")
     # 1. Check if the rule even applies to this sensor
-    if rule["sensor_id"] != telemetry["device_id"]:
+    if rule["sensor_id"] != clean_device_id:
         return False
         
     # 2. Get the actual operator function
