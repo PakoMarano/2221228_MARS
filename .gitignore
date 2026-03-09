@@ -1,5 +1,8 @@
 mars-iot-simulator-oci.tar
 
+.vscode/
+.idea/
+
 # Python
 venv/
 __pycache__/

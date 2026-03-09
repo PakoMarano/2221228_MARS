@@ -17,6 +17,7 @@ async def consume_and_broadcast():
             payload = msg.get("payload", {})
             
             formatted_msg = None
+            #print(f"Received message on topic '{topic}': {payload}")
             
             # Translates backend events into the schema required by the frontend
             if topic == "actuator-events":
@@ -30,17 +31,25 @@ async def consume_and_broadcast():
                     "timestamp": datetime.utcnow().isoformat() + "Z"
                 }
             elif topic == "internal-telemetry":
+                raw_value = payload.get("value")
+                # 2. Tentiamo una conversione sicura
+                try:
+                    final_value = float(raw_value)
+                except (ValueError, TypeError):
+                    final_value = raw_value
+                
                 formatted_msg = {
                     "category": "sensor",
-                    "key": payload.get("sensor_id", payload.get("key", "unknown")),
+                    "key": payload.get("device_id", payload.get("key", "unknown")),
                     "metric": payload.get("metric", "level"),
                     "unit": payload.get("unit", ""),
-                    "value": float(payload.get("value", 0.0)),
+                    "value": final_value,
                     "status": payload.get("status", "ok"),
                     "timestamp": payload.get("timestamp", datetime.utcnow().isoformat() + "Z")
                 }
             
             if formatted_msg:
+                print(f"📢 Broadcasting a {len(manager.active_connections)} client connessi: {formatted_msg}")
                 await manager.broadcast(formatted_msg)
                 
     except asyncio.CancelledError:
