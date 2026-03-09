@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
-const USE_DOCKER = process.env.USE_DOCKER === "false";
+const USE_DOCKER = process.env.USE_DOCKER === "true";
 
 const REST_PROTOCOL = process.env.REST_PROTOCOL || "http";
 const REST_HOST = process.env.REST_HOST || "localhost";

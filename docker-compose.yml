@@ -142,10 +142,10 @@ services:
     environment:
       USE_DOCKER: "true"
       REST_PROTOCOL: "http"
-      REST_HOST: "host.docker.internal"
-      REST_PORT: "8001"
+      REST_HOST: "automation-engine-api"
+      REST_PORT: "8000"
       WS_PROTOCOL: "ws"
-      WS_HOST: "host.docker.internal"
+      WS_HOST: "presentation-service"
       WS_PORT: "4000"
 
 volumes:

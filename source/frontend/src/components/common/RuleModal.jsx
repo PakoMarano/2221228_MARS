@@ -49,7 +49,7 @@ const RuleModal = ({ isOpen, onClose, onSave, rule }) => {
     };
 
     const handleSubmit = () => {
-        onSave(form);
+        onSave({...form, threshold: form.threshold.toString()});
     };
 
     return (
