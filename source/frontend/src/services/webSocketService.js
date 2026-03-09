@@ -20,13 +20,13 @@ export const useWebSocketService = () => {
             try {
                 const data = JSON.parse(event.data);
 
-                const { category, key, metric, value, unit, status, timestamp } = data;
+                const { device_type, device_id, metric, value, unit, status, timestamp } = data;
 
-                switch (category) {
+                switch (device_type) {
 
                     case "sensor":
                         dispatch(addSensorValue({
-                            key,
+                            key: device_id,
                             metric,
                             value,
                             unit,
@@ -36,6 +36,10 @@ export const useWebSocketService = () => {
                         break;
 
                     case "topic":
+                        let key = data.device_id ?? data.key;
+                        if (typeof key === "string" && key.startsWith("mars/telemetry/")) {
+                            key = key.replace("mars/telemetry/", "");
+                        }
                         dispatch(addTopicValue({
                             key,
                             metric,
@@ -47,7 +51,7 @@ export const useWebSocketService = () => {
                         break;
 
                     case "actuator":
-                        dispatch(setActuator(key, value));
+                        dispatch(setActuator(device_id, value));
                         const triggeredRuleId = Number(metric);
                         if (!isNaN(triggeredRuleId)) {
                             dispatch(updateRule(triggeredRuleId, { lastTriggered: timestamp }));

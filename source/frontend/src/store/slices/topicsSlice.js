@@ -2,10 +2,7 @@ import { TOPICS } from "../../constants/enums/topics";
 
 /* ---------------- STATO INIZIALE ---------------- */
 export const initialTopicsState = {
-    values: Object.values(TOPICS).reduce((acc, topic) => {
-        acc[topic.key] = {};
-        return acc;
-    }, {})
+    values: {}
 };
 
 /* ---------------- AZIONI ---------------- */
@@ -29,35 +26,64 @@ export const addTopicsBatch = (data) => ({
 /* ---------------- REDUCER ---------------- */
 const MAX_HISTORY = 500;
 
+// Funzione per creare la label dal key dinamico
+const createLabelFromKey = (key) => {
+    if (!key.includes("/")) {
+        return key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    } else {
+        const parts = key.split("/");
+        const main = parts.slice(0, -1)
+            .map(p => p.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()))
+            .join(" ");
+        const last = parts[parts.length - 1];
+        return `${main} (${last})`;
+    }
+};
+
 export const topicsReducer = (state, action) => {
 
     switch (action.type) {
 
         case TOPICS_ACTIONS.ADD_VALUE: {
+            const { key: rawKey, metric, value, unit, status, timestamp } = action.payload;
 
-            const { key, metric, value, unit, status, timestamp } = action.payload;
+            // Rimuovo il prefisso della socket
+            const key = rawKey.startsWith("mars/telemetry/")
+                ? rawKey.replace("mars/telemetry/", "")
+                : rawKey;
 
-            const topicMetrics = state.values[key] ?? {};
+            // Controllo se esiste già il topic fisso
+            const matchedTopic = Object.values(TOPICS).find(t => t.key === key);
+
+            // Prendo lo stato esistente o creo nuovo oggetto
+            const existing = state.values[key] || {};
+
+            // Determino la label
+            const topicLabel = existing.label || matchedTopic?.label || createLabelFromKey(key);
+
+            // Copio le metriche esistenti (senza label)
+            const topicMetrics = { ...existing };
+            delete topicMetrics.label;
+
+            // Aggiorno la history della metrica corrente
             const history = topicMetrics[metric] ?? [];
-
             const newHistory = [
                 ...history,
-                {
-                    value,
-                    timestamp: timestamp ?? Date.now(),
-                    unit,
-                    status
-                }
+                { value, timestamp: timestamp ?? Date.now(), unit, status }
             ].slice(-MAX_HISTORY);
+
+            // Ricostruisco il topic
+            const newTopicState = {
+                label: topicLabel,
+                ...topicMetrics,
+                [metric]: newHistory
+            };
 
             return {
                 ...state,
                 values: {
                     ...state.values,
-                    [key]: {
-                        ...topicMetrics,
-                        [metric]: newHistory
-                    }
+                    [key]: newTopicState
                 }
             };
         }
@@ -81,9 +107,7 @@ export const getTopicAverage = (state, key, metric, n = 10) => {
     if (!arr?.length) return null;
 
     const slice = arr.slice(-n);
-    const sum = slice.reduce((acc, curr) => acc + curr.value, 0);
-
-    return sum / slice.length;
+    return slice.reduce((acc, curr) => acc + curr.value, 0) / slice.length;
 };
 
 /* Trend: differenza tra ultimo e penultimo valore */

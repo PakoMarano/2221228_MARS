@@ -6,20 +6,20 @@ export const TOPICS = {
         tags: ["power", "low"]
     },
     radiation: {
-        key: "radiation",
-        label: "Radiation",
+        key: "radiation-monitor/habitat-alpha",
+        label: "Radiation (habitat alpha)",
         defaultChartType: "line",
         tags: ["environment", "medium"]
     },
     life_support: {
-        key: "life_support",
-        label: "Life Support",
+        key: "life-support/habitat-alpha",
+        label: "Life Support (habitat alpha)",
         defaultChartType: "line",
         tags: ["environment", "high"]
     },
     thermal_loop: {
-        key: "thermal_loop",
-        label: "Thermal Loop",
+        key: "thermal_loop/primary",
+        label: "Thermal Loop (primary)",
         defaultChartType: "area",
         tags: ["thermal", "medium"]
     },
@@ -36,8 +36,8 @@ export const TOPICS = {
         tags: ["power", "low"]
     },
     airlock: {
-        key: "airlock",
-        label: "Airlock",
+        key: "airlock/airlock-1",
+        label: "Airlock (airlock-1)",
         defaultChartType: "line",
         tags: ["airlock", "high"]
     }

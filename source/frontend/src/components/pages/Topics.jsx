@@ -22,7 +22,25 @@ const Topics = () => {
         }
     };
 
-    const filteredTopics = Object.values(TOPICS).filter(topic => {
+    const allTopics = [
+        // prima i topics fissi
+        ...Object.values(TOPICS),
+        // poi quelli dinamici dallo state che non erano in TOPICS
+        ...Object.keys(topicsState.values)
+            .filter(key => !Object.values(TOPICS).some(t => t.key === key))
+            .map(key => {
+                const topicData = topicsState.values[key];
+                return {
+                    key,
+                    label: topicData.label || key,
+                    defaultChartType: "line",
+                    tags: []
+                };
+            })
+    ];
+
+    const filteredTopics = allTopics.filter(topic => {
+        if (!topic.tags || topic.tags.length === 0) return true;
         const topicType = topic.tags[0];
         const topicCriticality = topic.tags[1];
         return activeTypes.includes(topicType) && activeCriticalities.includes(topicCriticality);
@@ -68,13 +86,19 @@ const Topics = () => {
 
             <div className="card-grid cols-3">
                 {filteredTopics.map(topic => {
-                    const metrics = Object.keys(topicsState.values[topic.key] ?? {});
+
+                    const topicData = topicsState.values[topic.key] ?? {};
+
+                    const metrics = Object.keys(topicData)
+                        .filter(k => k !== "label");
+
                     const hasMultipleMetrics = metrics.length > 1;
+
                     const currentIndex = metricIndex[topic.key] ?? 0;
                     const currentMetric = metrics[currentIndex];
 
                     const dataToDisplay = currentMetric
-                        ? topicsState.values[topic.key][currentMetric]
+                        ? topicData[currentMetric]
                         : [];
 
                     return (
@@ -86,12 +110,13 @@ const Topics = () => {
                         >
                             <Chart
                                 data={dataToDisplay}
-                                type={topic.chartType}
+                                type={topic.chartType || topic.defaultChartType}
                                 unit={topic.unit || ""}
                                 title={`${topic.label}${hasMultipleMetrics ? ` (${currentMetric})` : ""}`}
                                 width="100%"
                                 height={200}
                             />
+
                             {hasMultipleMetrics && (
                                 <div className="metric-hint">
                                     Click to switch metric

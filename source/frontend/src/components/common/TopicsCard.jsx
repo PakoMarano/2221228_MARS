@@ -8,6 +8,25 @@ const TopicsCard = ({ onViewAll }) => {
     const { state } = useStore();
     const topicsState = state.topics;
 
+    const allTopics = [
+        // topic statici
+        ...Object.values(TOPICS),
+
+        // topic dinamici non presenti nei TOPICS
+        ...Object.keys(topicsState.values)
+            .filter(key => !Object.values(TOPICS).some(t => t.key === key))
+            .map(key => {
+                const topicData = topicsState.values[key];
+
+                return {
+                    key,
+                    label: topicData.label || key,
+                    defaultChartType: "line",
+                    tags: []
+                };
+            })
+    ];
+
     const [metricIndex, setMetricIndex] = useState({});
 
     const handleMetricChange = (key, metrics) => {
@@ -33,8 +52,9 @@ const TopicsCard = ({ onViewAll }) => {
             }
         >
             <div className="card-grid cols-2">
-                {Object.values(TOPICS).map((topic) => {
-                    const metrics = Object.keys(topicsState.values[topic.key] ?? {});
+                {allTopics.map((topic) => {
+                    const topicData = topicsState.values[topic.key] ?? {};
+                    const metrics = Object.keys(topicData).filter(k => k !== "label");
                     const currentIndex = metricIndex[topic.key] ?? 0;
                     const currentMetric = metrics[currentIndex];
 
