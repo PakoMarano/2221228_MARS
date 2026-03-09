@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Chart from "../ui/Chart";
-import { TOPICS } from "../../constants/enums/topics";
 import { useStore } from "../../store/store";
+import { getAllTopics } from "../../utils/topic-utils";
 
 const TYPES = ["power", "environment", "thermal", "airlock"];
 const CRITICALITIES = ["high", "medium", "low"];
@@ -22,22 +22,7 @@ const Topics = () => {
         }
     };
 
-    const allTopics = [
-        // prima i topics fissi
-        ...Object.values(TOPICS),
-        // poi quelli dinamici dallo state che non erano in TOPICS
-        ...Object.keys(topicsState.values)
-            .filter(key => !Object.values(TOPICS).some(t => t.key === key))
-            .map(key => {
-                const topicData = topicsState.values[key];
-                return {
-                    key,
-                    label: topicData.label || key,
-                    defaultChartType: "line",
-                    tags: []
-                };
-            })
-    ];
+    const allTopics = getAllTopics(topicsState);
 
     const filteredTopics = allTopics.filter(topic => {
         if (!topic.tags || topic.tags.length === 0) return true;

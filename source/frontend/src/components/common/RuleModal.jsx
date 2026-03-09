@@ -2,55 +2,114 @@ import React, { useState, useEffect, useMemo } from "react";
 import Modal from "../ui/Modal";
 import { ACTUATORS } from "../../constants/enums/actuators";
 import { SENSORS } from "../../constants/enums/sensors";
-import { TOPICS } from "../../constants/enums/topics";
+import { getAllTopics } from "../../utils/topic-utils";
+import { useStore } from "../../store/store";
 
 const RuleModal = ({ isOpen, onClose, onSave, rule }) => {
+    const { state } = useStore();
+    const topicsState = state.topics;
+    const sensorsState = state.sensors;
+
+    const allTopics = useMemo(() => {
+        return getAllTopics(topicsState);
+    }, [topicsState]);
+
     const unifiedSensorsTopics = useMemo(() => {
+
         const sensorsList = Object.entries(SENSORS).map(([key, val]) => ({
             id: key,
-            label: `${val.label} (Sensor)`
+            label: `${val.label} (Sensor)`,
+            type: "sensor"
         }));
-        const topicsList = Object.entries(TOPICS).map(([key, val]) => ({
-            id: key,
-            label: `${val.label} (Topic)`
+
+        const topicsList = allTopics.map(topic => ({
+            id: topic.key,
+            label: `${topic.label} (Topic)`,
+            type: "topic"
         }));
-        return [...sensorsList, ...topicsList];
-    }, []);
+
+        return [
+            ...sensorsList,
+            ...topicsList
+        ];
+
+    }, [allTopics]);
 
     const defaultSensor = unifiedSensorsTopics[0]?.id || "";
     const defaultActuator = Object.keys(ACTUATORS)[0] || "";
 
-    const [form, setForm] = useState({
+    const initialState = {
         sensorId: defaultSensor,
         operator: ">",
         threshold: 0,
         actuator: defaultActuator,
         setTo: "ON",
         status: true,
-    });
+        unit: "",
+    }
 
-    useEffect(() => {
-        if (rule) {
-            setForm(rule);
+    const [form, setForm] = useState(initialState);
+
+    const [selectedUnit, setSelectedUnit] = useState("");
+    const availableUnits = useMemo(() => {
+        if (!form.sensorId) return [];
+
+        const isSensor = SENSORS[form.sensorId] !== undefined;
+
+        if (isSensor) {
+            const sensorData = sensorsState.values[form.sensorId];
+            if (!sensorData) return [];
+
+            const units = Object.keys(sensorData)
+                .map(metric => sensorData[metric])
+                .flat()
+                .map(entry => entry.unit)
+                .filter(Boolean);
+
+            return [...new Set(units)];
         } else {
-            setForm({
-                sensorId: defaultSensor,
-                operator: ">",
-                threshold: 0,
-                actuator: defaultActuator,
-                setTo: "ON",
-                status: true,
-            });
+            const topicData = topicsState.values[form.sensorId];
+            if (!topicData) return [];
+
+            const metrics = Object.keys(topicData).filter(k => k !== "label");
+
+            const units = metrics
+                .map(metric => topicData[metric])
+                .flat()
+                .map(entry => entry.unit)
+                .filter(Boolean);
+
+            return [...new Set(units)];
         }
-    }, [rule, defaultSensor, defaultActuator]);
+    }, [form.sensorId, sensorsState, topicsState]);
 
     const handleChange = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }));
     };
 
     const handleSubmit = () => {
-        onSave({...form, threshold: form.threshold.toString()});
+        onSave({
+            ...form,
+            unit: selectedUnit,
+            threshold: form.threshold.toString()
+        });
     };
+
+    useEffect(() => {
+        if (rule) {
+            setForm(rule);
+        } else {
+            setForm(initialState);
+        }
+    }, [rule, defaultSensor, defaultActuator]);
+
+    useEffect(() => {
+        if (availableUnits.length) {
+            setSelectedUnit(availableUnits[0]);
+        } else {
+            setSelectedUnit("");
+        }
+    }, [availableUnits]);
 
     return (
         <Modal
@@ -95,6 +154,18 @@ const RuleModal = ({ isOpen, onClose, onSave, rule }) => {
                     value={form.threshold}
                     onChange={(e) => handleChange("threshold", e.target.value)}
                 />
+
+                <label>Unit</label>
+                <select
+                    value={selectedUnit}
+                    onChange={(e) => setSelectedUnit(e.target.value)}
+                >
+                    {availableUnits.map(unit => (
+                        <option key={unit} value={unit}>
+                            {unit}
+                        </option>
+                    ))}
+                </select>
 
                 <label>Actuator</label>
                 <select

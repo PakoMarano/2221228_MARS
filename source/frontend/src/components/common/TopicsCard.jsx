@@ -1,31 +1,14 @@
 import React, { useState } from "react";
 import Card from "../ui/Card";
-import { TOPICS } from "../../constants/enums/topics";
 import { useStore } from "../../store/store";
 import { getLastTopicValue } from "../../store/slices/topicsSlice";
+import { getAllTopics } from "../../utils/topic-utils";
 
 const TopicsCard = ({ onViewAll }) => {
     const { state } = useStore();
     const topicsState = state.topics;
 
-    const allTopics = [
-        // topic statici
-        ...Object.values(TOPICS),
-
-        // topic dinamici non presenti nei TOPICS
-        ...Object.keys(topicsState.values)
-            .filter(key => !Object.values(TOPICS).some(t => t.key === key))
-            .map(key => {
-                const topicData = topicsState.values[key];
-
-                return {
-                    key,
-                    label: topicData.label || key,
-                    defaultChartType: "line",
-                    tags: []
-                };
-            })
-    ];
+    const allTopics = getAllTopics(topicsState);
 
     const [metricIndex, setMetricIndex] = useState({});
 

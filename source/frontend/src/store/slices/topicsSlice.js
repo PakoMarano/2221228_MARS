@@ -2,7 +2,10 @@ import { TOPICS } from "../../constants/enums/topics";
 
 /* ---------------- STATO INIZIALE ---------------- */
 export const initialTopicsState = {
-    values: {}
+    values: Object.values(TOPICS).reduce((acc, topic) => {
+        acc[topic.key] = {};
+        return acc;
+    }, {})
 };
 
 /* ---------------- AZIONI ---------------- */

@@ -2,22 +2,22 @@ import React, { useState } from "react";
 import { useStore } from "../../store/store";
 import { ACTUATORS } from "../../constants/enums/actuators";
 import { SENSORS } from "../../constants/enums/sensors";
-import { TOPICS } from "../../constants/enums/topics";
-import { getAllRules, deleteRule } from "../../store/slices/rulesSlice";
+import { getAllRules } from "../../store/slices/rulesSlice";
 import { useRules } from "../../hooks/useRules";
 import ConfirmModal from "../common/ConfirmModal";
 import RuleModal from "../common/RuleModal";
+import { getAllTopics } from "../../utils/topic-utils";
 
 const Controls = () => {
     const { state, dispatch } = useStore();
     const rules = getAllRules(state.rules);
+    const allTopics = getAllTopics(state.topics);
 
     const { createNewRule, updateExistingRule, removeRule, toggleRuleStatus } = useRules();
 
     const [deleteId, setDeleteId] = useState(null);
     const [editingRule, setEditingRule] = useState(null);
     const [isRuleModalOpen, setRuleModalOpen] = useState(false);
-
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
     const handleSort = (key) => {
@@ -28,19 +28,29 @@ const Controls = () => {
         setSortConfig({ key, direction });
     };
 
+    const getLabelForSensorOrTopic = (id) => {
+        const sensorLabel = SENSORS[id]?.label;
+        if (sensorLabel) return sensorLabel;
+
+        const topicLabel = allTopics.find(t => t.key === id)?.label;
+        if (topicLabel) return topicLabel;
+
+        return id;
+    };
+
     const sortedRules = [...rules].sort((a, b) => {
         if (!sortConfig.key) return 0;
 
         const aValue =
             sortConfig.key === "sensorId"
-                ? SENSORS[a.sensorId]?.label || TOPICS[a.sensorId]?.label || a.sensorId
+                ? getLabelForSensorOrTopic(a.sensorId)
                 : sortConfig.key === "actuator"
                     ? ACTUATORS[a.actuator]?.label || a.actuator
                     : a[sortConfig.key];
 
         const bValue =
             sortConfig.key === "sensorId"
-                ? SENSORS[b.sensorId]?.label || TOPICS[b.sensorId]?.label || b.sensorId
+                ? getLabelForSensorOrTopic(b.sensorId)
                 : sortConfig.key === "actuator"
                     ? ACTUATORS[b.actuator]?.label || b.actuator
                     : b[sortConfig.key];
@@ -59,9 +69,7 @@ const Controls = () => {
         );
     };
 
-    const handleDelete = (id) => {
-        setDeleteId(id);
-    };
+    const handleDelete = (id) => setDeleteId(id);
 
     const confirmDelete = async () => {
         await removeRule(deleteId);
@@ -84,7 +92,6 @@ const Controls = () => {
         } else {
             await createNewRule(data);
         }
-
         setRuleModalOpen(false);
     };
 
@@ -107,6 +114,9 @@ const Controls = () => {
                         <th onClick={() => handleSort("threshold")} style={{ cursor: "pointer" }}>
                             Threshold {getSortIcon("threshold")}
                         </th>
+                        <th onClick={() => handleSort("unit")} style={{ cursor: "pointer" }}>
+                            Unit {getSortIcon("unit")}
+                        </th>
                         <th onClick={() => handleSort("actuator")} style={{ cursor: "pointer" }}>
                             Actuator {getSortIcon("actuator")}
                         </th>
@@ -124,25 +134,22 @@ const Controls = () => {
                 </thead>
                 <tbody>
                     {sortedRules.map((rule) => {
-                        const sensorLabel =
-                            SENSORS[rule.sensorId]?.label ||
-                            TOPICS[rule.sensorId]?.label ||
-                            rule.sensorId;
-                        const actuatorLabel =
-                            ACTUATORS[rule.actuator]?.label || rule.actuator;
+                        const sensorLabel = getLabelForSensorOrTopic(rule.sensorId);
+                        const actuatorLabel = ACTUATORS[rule.actuator]?.label || rule.actuator;
 
                         return (
                             <tr key={rule.id}>
                                 <td>{sensorLabel}</td>
                                 <td>{rule.operator}</td>
                                 <td>{rule.threshold}</td>
+                                <td>{rule.unit}</td>
                                 <td>{actuatorLabel}</td>
                                 <td>{rule.setTo}</td>
+                                <td>{rule.status ? "Active" : "Inactive"}</td>
                                 <td>
-                                    {rule.status ? "Active" : "Inactive"}
-                                </td>
-                                <td>
-                                    {rule.lastTriggered ? new Date(rule.lastTriggered).toLocaleTimeString() : "-"}
+                                    {rule.lastTriggered
+                                        ? new Date(rule.lastTriggered).toLocaleTimeString()
+                                        : "-"}
                                 </td>
                                 <td className="actions-cell">
                                     <div>
@@ -150,7 +157,6 @@ const Controls = () => {
                                             className="bi bi-pencil-fill"
                                             onClick={() => handleEdit(rule)}
                                         ></i>
-
                                         <i
                                             className="bi bi-trash-fill"
                                             onClick={() => handleDelete(rule.id)}
