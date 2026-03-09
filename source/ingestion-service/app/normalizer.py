@@ -132,7 +132,7 @@ def normalize_telemetry_payload(topic: str, raw_data: dict) -> list[NormalizedEv
         source = raw_data.get("source")
         system = source.get("system")
         segment = source.get("segment")
-        device_id = f"{segment}/{system}"
+        device_id = f"{system}/{segment}"
         
         measurements = raw_data.get("measurements", [])
         for meas in measurements:
