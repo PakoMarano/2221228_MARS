@@ -188,38 +188,119 @@ Uses a Singleton pattern for the ConnectionManager to track active clients. A ba
 
 ## CONTAINER_NAME: frontend
 
-### DESCRIPTION: 
-React single-page application for monitoring sensors/topics, visualizing charts, managing rules, and controlling actuators.
+### DESCRIPTION:
+
+The frontend container provides the user interface of the Martian Survival Kit platform.  
+It delivers a web-based dashboard that enables users to monitor habitat conditions in real time, visualize recent telemetry data, and manage automation rules controlling actuators.
+
+The application is implemented as a **Single Page Application (SPA)** that dynamically retrieves data from backend services and updates the interface without full page reloads.  
+Through a combination of REST API calls and WebSocket connections, the frontend ensures that sensor values, actuator states, and automation rule activity are continuously synchronized with the system.
 
 ### USER STORIES:
-1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
 
-### PORTS: 
-3000:3000
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+
+### PORTS:
+
+3000
+
+### DESCRIPTION:
+
+The container runs a Node.js environment that hosts the frontend web application.  
+The application provides interactive dashboards and management interfaces that allow users to:
+
+- monitor sensor telemetry in real time
+- visualize a short-term history of recently received telemetry values through graphical charts
+- observe actuator states
+- manage automation rules controlling system behavior
+
+The frontend retrieves configuration and rule data through REST APIs exposed by the Automation Engine and receives real-time updates of sensors and actuator events through WebSocket streams provided by the Presentation Service.
 
 ### PERSISTENCE EVALUATION
-The container only serves static files and handles proxying. No backend persistence; client-side in-memory store only (state resets on refresh). Only persists saved actuators rule.
+The frontend does not rely on persistent storage.
+
+To support data visualization features such as charts, the application temporarily maintains a limited in-memory history of the most recent values received through the WebSocket connection. This history is stored only in the client-side runtime state and is used to render charts for sensors and telemetry topics.
+
+The stored history is limited (e.g., up to the most recent 500 values) and exists only while the web application session remains active. If the page is refreshed or closed, the stored data is discarded and the history starts again from newly received events.
+
+Long-term persistence of system data is not handled by the frontend and is outside the scope of this microservice.
 
 ### EXTERNAL SERVICES CONNECTIONS
-During development, it connects via Webpack internal proxy to http://automation-engine-api:8000 (for REST APIs) and establishes a direct connection from the browser to ws://localhost:4000/ws (presentation-service).
+The frontend communicates with the following internal services:
+
+- **Automation Engine API** (REST – HTTP)  
+  Used for automation rule management and actuator control.  
+  The frontend retrieves the list of existing automation rules and allows users to create, edit, delete, or temporarily disable them through REST API calls.  
+
+  In addition, when the application is loaded, the frontend queries the Automation Engine to obtain the **initial state of all actuators**, ensuring that the dashboard reflects the current system state.  
+  The same service is also used to **manually control actuators**, allowing users to toggle devices directly from the dashboard interface.
+
+- **Presentation Service** (WebSocket)  
+  Used to receive **real-time telemetry updates** for sensors and actuator events.  
+  Through this WebSocket connection, the frontend receives continuous event streams that update dashboard widgets, charts, and actuator status indicators without requiring manual refreshes.
+
+By combining REST-based interactions for configuration and control with WebSocket-based streaming for real-time updates, the frontend provides a responsive monitoring interface that remains continuously synchronized with the system state.
 
 ### MICROSERVICES:
 
-#### MICROSERVICE: frontend
+#### MICROSERVICE: frontend-ui
+
 - TYPE: frontend
-- DESCRIPTION: RealTime Martian Survival Kit Dashboard.
-- PORTS: 3000
+
+- DESCRIPTION:  
+  The frontend UI microservice provides the graphical interface used to monitor the Martian habitat environment and interact with the automation system.  
+  It visualizes real-time telemetry data, actuator states, warning conditions, and automation rules through a set of interactive dashboards and management pages.
+
+- PORTS:  
+  3000
+
 - TECHNOLOGICAL SPECIFICATION:
-React.js, Webpack, Babel.
-- SERVICE ARCHITECTURE: 
-Component-based architecture. Uses Context API or local State Management to handle the data flow arriving from WebSockets and selectively update sensor cards to minimize re-renders. Includes logic to bypass CORS issues in a Docker environment.
+  The microservice is implemented using **Node.js** and runs inside a Docker container based on the `node:20-alpine` image.
+
+Dependencies are installed using **npm**, and the application is started through the Node development server (`npm start`).
+
+The frontend interacts with backend services through:
+
+- **REST APIs (HTTP)** for rule management operations
+- **WebSocket connections** for receiving real-time sensor and actuator updates
+
+Environment variables are used to configure service endpoints dynamically within the container, allowing the application to connect to backend microservices deployed in the same Docker network.
+
+- SERVICE ARCHITECTURE:
+  The frontend follows a **Single Page Application (SPA) architecture** where the user interface is rendered dynamically on the client side.
+
+Navigation between application sections occurs without full page reloads, improving responsiveness and enabling real-time updates of system information.
+
+To support real-time visualization and chart rendering, the frontend maintains a temporary in-memory buffer of the most recent telemetry values received from the Presentation Service. This buffer is used to generate short-term historical charts but is not persisted across sessions.
+
+The architecture consists of:
+
+- UI components responsible for rendering dashboards and widgets
+- chart components used for visualizing historical telemetry data
+- REST clients used for interacting with the Automation Engine API
+- WebSocket listeners used for receiving live telemetry and actuator events
+
+This architecture ensures that the frontend remains lightweight and reactive while delegating data processing and persistence responsibilities to backend microservices.
 
 - PAGES:
 
-| Name | Description | Related Microservice | User Stories |
-| ---- | ----------- | -------------------- | ------------ |
-| Dashboard | Summary cards for sensors, telemetry topics, and actuators with live updates | ingestion-service, automation-engine-api, automation-engine-worker, presentation-service | 1, 2, 3, 4, 12, 15 |
-| Sensors | Filterable sensor charts by habitat area and measurement type with metric switching | ingestion-service, presentation-service | 5, 6, 7 |
-| Telemetry | Filterable topic charts by type and criticality with metric switching | ingestion-service, presentation-service | 5, 6, 7 |
-| Controls | Rule table, create/edit/delete, status toggle, and last-triggered visibility | automation-engine-api, automation-engine-worker, presentation-service | 8, 9, 10, 11, 13, 14, 15 |
-
+| Name         | Description                                                                                                                                                                                                                                                                                                                                                                          | Related Microservice  | User Stories     |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- | ---------------- |
+| Dashboard    | Main real-time monitoring interface providing an overview of all sensors and actuators in the habitat. Widgets display the latest sensor value grouped by metric or unit of measurement, the timestamp of the most recent update, and warning indicators when thresholds are exceeded. The page also shows actuator states and updates automatically as new telemetry events arrive. | presentation-service  | 1,2,3,4,8        |
+| Sensors Page | Visualization page for sensor data. It displays a short-term history of recently received values using interactive charts such as line, bar, and area graphs. Users can switch between available metrics or measurement units and apply filters to focus on specific sensors or locations. | presentation-service | 5,6,7 |
+| Topics Page | Visualization page for telemetry data. Data is presented using the same visualization mechanisms as the Sensors Page, including line, bar, and area charts and the ability to switch metrics and apply filters. The page differs only in the type of monitored entities, focusing on internal telemetry topics rather than physical sensors. | presentation-service | 5,6,7 |
+| Rules Page   | Automation rules management interface. Users can view all existing rules, create new rules, edit existing ones through modal dialogs, delete obsolete rules, or temporarily disable rules without removing them from the system. The page also displays information about rule execution activity.                                                                                   | automation-engine-api | 9,10,11,12,14,15 |
