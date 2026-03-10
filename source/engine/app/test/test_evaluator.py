@@ -13,9 +13,9 @@ rule_temp = {
 
 rule_airlock = {
     "id": 2,
-    "sensor_id": "main_airlock",
+    "sensor_id": "airlock/airlock-1",
     "operator": "==",
-    "threshold_value": "PRESSURIZING",
+    "threshold_value": "2",
     "unit": "state",
     "actuator_target": "inner_door",
     "actuator_state": "LOCKED"
@@ -41,9 +41,35 @@ telemetry_hot_f = {
 }
 
 telemetry_airlock = {
-    "device_id": "main_airlock",
+    "device_id": "airlock/airlock-1",
     "value": "PRESSURIZING",
     "unit": "state"
+}
+
+rule_airlock_numeric_threshold = {
+    "id": 3,
+    "sensor_id": "airlock/airlock-1",
+    "operator": "==",
+    "threshold_value": "2",
+    "unit": "state",
+    "actuator_target": "inner_door",
+    "actuator_state": "LOCKED"
+}
+
+telemetry_airlock_numeric = {
+    "device_id": "airlock/airlock-1",
+    "value": "IDLE",
+    "unit": "state"
+}
+
+rule_airlock_string_threshold = {
+    "id": 4,
+    "sensor_id": "airlock/airlock-1",
+    "operator": "==",
+    "threshold_value": "1",
+    "unit": "state",
+    "actuator_target": "inner_door",
+    "actuator_state": "LOCKED"
 }
 
 # Run the tests
@@ -53,4 +79,6 @@ print("Test 2 (Cold Temp > 25):   ", evaluate_rule(rule_temp, telemetry_cold))  
 print("Test 3 (Airlock Match):    ", evaluate_rule(rule_airlock, telemetry_airlock)) # Expected: True
 print("Test 4 (Wrong Sensor):     ", evaluate_rule(rule_temp, telemetry_airlock)) # Expected: False
 print("Test 5 (Wrong Unit):       ", evaluate_rule(rule_temp, telemetry_hot_f)) # Expected: False
+print("Test 6 (Airlock 2==2):     ", evaluate_rule(rule_airlock_numeric_threshold, telemetry_airlock)) # Expected: True
+print("Test 7 (Airlock 1==1):     ", evaluate_rule(rule_airlock_string_threshold, telemetry_airlock_numeric)) # Expected: True
 print("-------------------------------")

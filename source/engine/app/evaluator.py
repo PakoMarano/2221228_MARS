@@ -11,6 +11,38 @@ OPERATORS = {
     "<=": operator.le
 }
 
+AIRLOCK_V1_SENSOR_ID = "airlock/airlock-1"
+
+AIRLOCK_CODE_TO_STATE = {
+    "0": "DEPRESSURIZING",
+    "1": "IDLE",
+    "2": "PRESSURIZING",
+}
+
+
+def _normalize_airlock_state(value):
+    """
+    Normalizes airlock state values to canonical string labels.
+    Accepts labels ("IDLE") and mapped numeric codes ("1"/1).
+    Returns the original value when no airlock mapping applies.
+    """
+    if isinstance(value, str):
+        normalized = value.strip().upper()
+        if normalized in AIRLOCK_CODE_TO_STATE.values():
+            return normalized
+        if normalized in AIRLOCK_CODE_TO_STATE:
+            return AIRLOCK_CODE_TO_STATE[normalized]
+        return value
+
+    if isinstance(value, (int, float)):
+        if isinstance(value, float) and not value.is_integer():
+            return value
+        as_code = str(int(value))
+        if as_code in AIRLOCK_CODE_TO_STATE:
+            return AIRLOCK_CODE_TO_STATE[as_code]
+
+    return value
+
 def evaluate_rule(rule: dict, telemetry: dict) -> bool:
     """
     Evaluates a single rule against a single telemetry event.
@@ -38,6 +70,11 @@ def evaluate_rule(rule: dict, telemetry: dict) -> bool:
     # 3. Handle type casting safely
     sensor_value = telemetry["value"]
     threshold_value = rule["threshold_value"]
+
+    # Airlock v1 states are compared as canonical labels, even if threshold is saved as 0/1/2.
+    if clean_device_id == AIRLOCK_V1_SENSOR_ID:
+        sensor_value = _normalize_airlock_state(sensor_value)
+        threshold_value = _normalize_airlock_state(threshold_value)
 
     # Only equality checks are meaningful for string states (e.g., "IDLE" vs "RUNNING").
     if isinstance(sensor_value, str) and op_str not in {"=", "==", "!="}:
