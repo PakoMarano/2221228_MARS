@@ -205,7 +205,7 @@ def normalize_telemetry_payload(topic: str, raw_data: dict) -> list[NormalizedEv
                 status=status,
                 metric="last_state",
                 value=state, 
-                unit=None    # States don't have units
+                unit="state"  
             ))
 
     return events
