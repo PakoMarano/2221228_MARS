@@ -36,18 +36,21 @@ const SensorsCard = ({ onViewAll }) => {
             <div className="card-grid cols-2">
                 {Object.values(SENSORS).map((sensor) => {
 
-                    const metrics = Object.keys(sensorsState.values[sensor.key] ?? {});
+                    const metrics = Object.keys(sensorsState.values[sensor.key] ?? []);
                     const currentIndex = metricIndex[sensor.key] ?? 0;
-                    const currentMetric = metrics[currentIndex];
 
-                    const lastValue = currentMetric
-                        ? getLastSensorValue(sensorsState, sensor.key, currentMetric)
-                        : null;
+                    const lastValues = metrics.map(metric =>
+                        getLastSensorValue(sensorsState, sensor.key, metric)
+                    );
+
+                    const lastValue = lastValues[currentIndex];
 
                     const displayValue = lastValue?.value ?? "-";
                     const unit = lastValue?.unit ?? "";
                     const timestamp = lastValue?.timestamp;
-                    const status = lastValue?.status;
+
+                    const currentMetricWarning = lastValue?.status === "warning";
+                    const anyMetricWarning = lastValues.some(v => v?.status === "warning");
 
                     const isValidDate =
                         timestamp && !isNaN(new Date(timestamp).getTime());
@@ -59,7 +62,10 @@ const SensorsCard = ({ onViewAll }) => {
                     return (
                         <div
                             key={sensor.key}
-                            className={`card-item ${status === "warning" ? "card-item-warning" : ""}`}
+                            className={`card-item 
+                                ${currentMetricWarning ? "card-item-metric-warning" : ""}
+                                ${!currentMetricWarning && anyMetricWarning ? "card-item-warning" : ""}
+                            `}
                             onClick={() => handleMetricChange(sensor.key, metrics)}
                             style={{ cursor: metrics.length > 1 ? "pointer" : "default" }}
                         >

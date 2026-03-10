@@ -155,6 +155,11 @@ const RuleModal = ({ isOpen, onClose, onSave, rule }) => {
                     onChange={(e) => handleChange("threshold", e.target.value)}
                 />
 
+                <small style={{ opacity: 0.7 }}>
+                    For string metrics use numeric mapping:
+                    DEPRESSURIZING=0, IDLE=1, PRESSURIZING=2
+                </small>
+
                 <label>Unit</label>
                 <select
                     value={selectedUnit}

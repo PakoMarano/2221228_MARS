@@ -146,13 +146,17 @@
   transform: rotate(180deg);
 }
 
-.card-item-warning {
+.card-item-metric-warning {
   border: 1px solid #f2c94c;
   background-color: rgb(201, 180, 76) !important;
 }
 
-.card-item-warning * {
+.card-item-metric-warning * {
   color: black !important;
+}
+
+.card-item-warning {
+  border: 1px solid #f2c94c;
 }
 
 .sensors-page,

@@ -39,19 +39,23 @@ const TopicsCard = ({ onViewAll }) => {
                     const topicData = topicsState.values[topic.key] ?? {};
                     const metrics = Object.keys(topicData).filter(k => k !== "label");
                     const currentIndex = metricIndex[topic.key] ?? 0;
-                    const currentMetric = metrics[currentIndex];
 
-                    const lastValue = currentMetric
-                        ? getLastTopicValue(topicsState, topic.key, currentMetric)
-                        : null;
+                    const lastValues = metrics.map(metric =>
+                        getLastTopicValue(topicsState, topic.key, metric)
+                    );
+
+                    const lastValue = lastValues[currentIndex];
 
                     const displayValue = lastValue?.value ?? "-";
                     const unit = lastValue?.unit ?? topic.unit ?? "";
                     const timestamp = lastValue?.timestamp;
-                    const status = lastValue?.status;
+
+                    const currentMetricWarning = lastValue?.status === "warning";
+                    const anyMetricWarning = lastValues.some(v => v?.status === "warning");
 
                     const isValidDate =
                         timestamp && !isNaN(new Date(timestamp).getTime());
+
                     const displayTime = isValidDate
                         ? new Date(timestamp).toLocaleTimeString()
                         : null;
@@ -59,7 +63,10 @@ const TopicsCard = ({ onViewAll }) => {
                     return (
                         <div
                             key={topic.key}
-                            className={`card-item ${status === "warning" ? "card-item-warning" : ""}`}
+                            className={`card-item
+                                ${currentMetricWarning ? "card-item-metric-warning" : ""}
+                                ${!currentMetricWarning && anyMetricWarning ? "card-item-warning" : ""}
+                            `}
                             onClick={() => handleMetricChange(topic.key, metrics)}
                             style={{ cursor: metrics.length > 1 ? "pointer" : "default" }}
                         >
