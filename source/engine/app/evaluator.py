@@ -3,6 +3,7 @@ import operator
 # Map string operators to actual Python math functions
 OPERATORS = {
     "=": operator.eq,
+    "==": operator.eq,
     "!=": operator.ne,
     ">": operator.gt,
     "<": operator.lt,
@@ -19,6 +20,12 @@ def evaluate_rule(rule: dict, telemetry: dict) -> bool:
     # 1. Check if the rule even applies to this sensor
     if rule["sensor_id"] != clean_device_id:
         return False
+
+    # 1b. If a rule is bound to a specific unit, only evaluate matching telemetry units.
+    rule_unit = str(rule.get("unit", "")).strip()
+    telemetry_unit = str(telemetry.get("unit", "")).strip()
+    if rule_unit and rule_unit.casefold() != telemetry_unit.casefold():
+        return False
         
     # 2. Get the actual operator function
     op_str = rule["operator"]
@@ -33,7 +40,7 @@ def evaluate_rule(rule: dict, telemetry: dict) -> bool:
     threshold_value = rule["threshold_value"]
 
     # Only equality checks are meaningful for string states (e.g., "IDLE" vs "RUNNING").
-    if isinstance(sensor_value, str) and op_str not in {"=", "!="}:
+    if isinstance(sensor_value, str) and op_str not in {"=", "==", "!="}:
         return False
     
     # If the sensor gave us a number, we must convert the DB string to a float before comparing
