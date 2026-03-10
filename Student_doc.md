@@ -72,7 +72,7 @@ Creates the topics needed for the kafka broker so that the services find all rea
 Microservice responsible for extracting raw data from the IoT simulator. It listens to the various WebSocket channels exposed by the simulator, extracts useful values from complex JSON payloads, formats them into a standardized schema (normalization), and publishes them to the Kafka broker on the internal-telemetry topic.
 
 ### USER STORIES:
-2. As a user, I want to see when each sensor last reported data, so that I can detect devices that may be offline or malfunctioning.
+1, 2, 6, 7
 
 ### PORTS: 
 8000:8000
@@ -126,6 +126,7 @@ Standard RESTful architecture with controllers ,Pydantic schemas for input valid
 - ENDPOINTS:
 		
 	| HTTP METHOD | URL | Description | User Stories |
+	| ----------- | --- | ----------- | ------------ |
 	| GET | /api/rules | Returns the list of all automation rules | 9, 15 |
     | POST | /api/rules | Creates a new rule for an actuator | 10 |
 	| PATCH | /api/rules/{rule_id} | Updates specific fields of an existing automation rule in the database | 11 |
@@ -183,6 +184,7 @@ Uses a Singleton pattern for the ConnectionManager to track active clients. A ba
 - ENDPOINTS:
 		
 	| HTTP METHOD | URL | Description | User Stories |
+	| ----------- | --- | ----------- | ------------ |
 	| GET(WS) | / | WebSocket endpoint for frontend connection and bidirectional streaming | 1, 4, 6, 8, 15 |
 
 
