@@ -167,7 +167,7 @@ Backend dedicated exclusively to the Frontend. Acts as a "WebSocket Bridge". It 
 Totally stateless. Does not keep any history. When a user connects, they only receive data generated from the moment of connection onwards (Kafka consumer set with auto_offset_reset="latest").
 
 ### EXTERNAL SERVICES CONNECTIONS
-Listens to kafka:9092 (topics: internal-telemetry). Exposes incoming connections on ws://localhost:4000/ for browsers.
+Listens to kafka:9092 (topics: internal-telemetry, actuator-events). Exposes incoming connections on ws://localhost:4000/ for browsers.
 
 ### MICROSERVICES:
 
